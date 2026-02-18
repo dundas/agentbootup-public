@@ -1,0 +1,78 @@
+/**
+ * Gemini CLI Session Start Hook with Daemon Integration
+ *
+ * This hook integrates with the memory sync daemon for fast session startup.
+ *
+ * Features:
+ * - Fast path: Loads memory instantly when daemon is running
+ * - Fallback: Syncs once if daemon is not running
+ * - Automatic memory loading
+ *
+ * Setup:
+ * 1. Rename to on_start.js (remove .example)
+ * 2. Configure sync: node memory-sync.mjs config init --mech-app-id=xxx --mech-api-key=xxx
+ * 3. Start daemon (optional): node memory-sync.mjs daemon start
+ * 4. Restart Gemini CLI
+ *
+ * The hook works with or without the daemon:
+ * - WITH daemon: Instant startup, real-time sync
+ * - WITHOUT daemon: One-time sync on startup, manual sync on exit
+ */
+
+import { handleSessionStart } from '../../lib/hooks/daemon-helper.js';
+
+async function onStart() {
+  console.log('[Gemini] Starting session with daemon integration');
+
+  try {
+    const result = await handleSessionStart({
+      basePath: process.cwd(),
+      daemonPort: 8765,
+      useFallback: true,
+      verbose: false // Use custom logging below
+    });
+
+    // Custom Gemini-style logging
+    if (result.daemonRunning) {
+      console.log('[Gemini] ✓ Daemon active (real-time sync)');
+    } else {
+      console.log('[Gemini] ⚠ Daemon not running (fallback mode)');
+    }
+
+    if (result.memory) {
+      const sizeKB = (result.memory.length / 1024).toFixed(2);
+      console.log(`[Gemini] ✓ Memory loaded (${sizeKB} KB)`);
+    } else {
+      console.log('[Gemini] ⚠ No memory found - run: node bootup.mjs --subset memory');
+    }
+
+    if (result.dailyLog) {
+      console.log('[Gemini] ✓ Daily log loaded');
+    }
+
+    console.log('[Gemini] Ready');
+
+    // Return context for Gemini
+    return {
+      context: {
+        memory: result.memory,
+        dailyLog: result.dailyLog
+      },
+      metadata: {
+        daemonRunning: result.daemonRunning
+      }
+    };
+  } catch (err) {
+    console.error('[Gemini] Session start error:', err.message);
+    console.log('[Gemini] Continuing without memory');
+
+    return {
+      context: {
+        memory: '',
+        dailyLog: ''
+      }
+    };
+  }
+}
+
+export { onStart };

@@ -1,0 +1,58 @@
+{
+  "name": "@dundas/agent-runtime",
+  "version": "2.0.0",
+  "description": "Platform-native agent daemon runtime. Library-first API (agentStart/agentStop/agentFleet) with launchd (macOS), systemd (Linux), and pm2 (Windows) backends.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "bin": {
+    "agent": "./bin/agent"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./platform": "./src/platform/index.ts",
+    "./services": "./src/services/index.ts",
+    "./transports": "./src/transports/index.ts",
+    "./process": "./src/process/index.ts"
+  },
+  "files": [
+    "src/**/*.ts",
+    "bin/**",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "bun x tsc --noEmit",
+    "test": "bun test",
+    "build": "bun build src/index.ts --outdir dist --target node"
+  },
+  "keywords": [
+    "agent",
+    "daemon",
+    "runtime",
+    "admp",
+    "brain",
+    "portfolio",
+    "pm2",
+    "launchd",
+    "systemd",
+    "process-manager",
+    "platform-native"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dundas/agentbootup.git",
+    "directory": "packages/agent-runtime"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {},
+  "optionalDependencies": {
+    "pm2": "^5.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}

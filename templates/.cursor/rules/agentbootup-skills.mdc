@@ -1,0 +1,75 @@
+---
+description: "Use agentbootup skills before creating new ones"
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.md"
+  - "**/*.py"
+  - "**/*.go"
+  - "**/*.rs"
+  - "**/*.java"
+  - "**/*.rb"
+  - "**/CLAUDE.md"
+  - "**/README.md"
+---
+
+# Agentbootup Skill Discovery
+
+## CRITICAL: Check Existing Skills First
+
+Before creating any new multi-file workflow, agent, or skill:
+
+1. **Read SKILLS_INDEX.md** - Contains full catalog of available skills with decision tree
+2. **Check .claude/skills/** - All available Claude Code skills
+3. **Check .ai-skills/README.md** - Universal skill discovery guide
+
+## When to Use Agentbootup Skills
+
+Use an existing agentbootup skill when the user asks for:
+
+- **PRD/Requirements**: Use `prd-writer` skill
+- **Task Generation**: Use `tasklist-generator` skill
+- **Task Processing**: Use `task-processor` or `task-processor-auto` skill
+- **Test Plans**: Use `test-plan-generator` skill
+- **Production Checklist**: Use `production-readiness` skill
+- **User Stories Only**: Use `user-story-generator` skill
+- **User Journey Mapping**: Use `user-journey-mapper` skill
+- **PR Review**: Use `pr-review-loop` skill
+- **Changelog**: Use `changelog-manager` skill
+- **Runbooks**: Use `runbook-generator` skill
+- **Design System**: Use `design-system-workflow` skill
+- **Full Dev Pipeline**: Use `dev-workflow-orchestrator` skill
+
+## DO NOT Create New Skills For
+
+- Generating PRDs, tasks, test plans, user stories, user journeys
+- Processing task lists with TDD workflow
+- Managing changelogs or runbooks
+- Production readiness checklists
+- PR review automation
+- Any workflow already in SKILLS_INDEX.md
+
+## When to Create New Skills
+
+Only create a NEW skill if:
+- ✅ No existing agentbootup skill covers the use case
+- ✅ It's a complex, multi-step workflow (not a simple task)
+- ✅ It will be reused across multiple projects
+- ✅ You've checked SKILLS_INDEX.md and confirmed no match
+
+## Skill Invocation in Cursor
+
+To use an agentbootup skill in Cursor:
+1. Reference the skill name in your prompt: "Use the prd-writer skill to..."
+2. Or directly invoke: "Run the production-readiness skill for checkout feature"
+3. I will read the skill's SKILL.md and follow its process
+
+## Key Principle
+
+**Reuse over Reinvention**: Agentbootup provides battle-tested workflows. Don't create ad-hoc versions of what already exists.
+
+---
+
+*This rule ensures Cursor uses agentbootup skills consistently and doesn't create duplicate workflows.*

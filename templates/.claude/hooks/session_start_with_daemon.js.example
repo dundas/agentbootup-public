@@ -1,0 +1,60 @@
+/**
+ * Claude Code Session Start Hook with Daemon Integration
+ *
+ * This hook integrates with the memory sync daemon for fast session startup.
+ *
+ * Features:
+ * - Fast path: Loads memory instantly when daemon is running
+ * - Fallback: Syncs once if daemon is not running
+ * - Automatic memory loading
+ *
+ * Setup:
+ * 1. Rename to session_start.js (remove .example)
+ * 2. Configure sync: node memory-sync.mjs config init --mech-app-id=xxx --mech-api-key=xxx
+ * 3. Start daemon (optional): node memory-sync.mjs daemon start
+ * 4. Restart Claude Code
+ *
+ * The hook works with or without the daemon:
+ * - WITH daemon: Instant startup, real-time sync
+ * - WITHOUT daemon: One-time sync on startup, manual sync on exit
+ */
+
+import { handleSessionStart } from '../../lib/hooks/daemon-helper.js';
+
+async function onSessionStart() {
+  try {
+    const result = await handleSessionStart({
+      basePath: process.cwd(),
+      daemonPort: 8765,
+      useFallback: true,
+      verbose: true
+    });
+
+    // Return context for Claude Code
+    // Note: The exact integration depends on Claude Code's hook API
+    return {
+      context: {
+        memory: result.memory,
+        dailyLog: result.dailyLog
+      },
+      metadata: {
+        daemonRunning: result.daemonRunning,
+        memoryPath: result.memoryPath,
+        dailyLogPath: result.dailyLogPath
+      }
+    };
+  } catch (err) {
+    console.error('[Claude] Session start error:', err.message);
+    console.log('[Claude] Continuing without memory');
+
+    return {
+      context: {
+        memory: '',
+        dailyLog: ''
+      },
+      error: err.message
+    };
+  }
+}
+
+export { onSessionStart };

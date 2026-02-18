@@ -1,0 +1,30 @@
+name: Public Export Snapshot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Validate policy
+        run: npm run public:check
+
+      - name: Build public export snapshot
+        run: node ./scripts/public-sync.mjs export --target ./public-export --clean
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-export
+          path: public-export

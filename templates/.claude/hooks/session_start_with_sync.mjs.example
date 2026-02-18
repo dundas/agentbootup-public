@@ -1,0 +1,98 @@
+#!/usr/bin/env bun
+/**
+ * Claude Code Session Start Hook with Memory Sync
+ *
+ * This hook:
+ * 1. Pulls latest memory from Mech Storage
+ * 2. Loads memory for the session
+ *
+ * To use:
+ * 1. Rename to session_start.mjs (remove .example)
+ * 2. Configure sync: node memory-sync.mjs config init --mech-app-id=xxx --mech-api-key=xxx
+ * 3. Restart Claude Code
+ */
+
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+async function pullMemory() {
+  try {
+    console.log('[SessionStart] Pulling memory from remote...');
+
+    const { stdout, stderr } = await execAsync('node memory-sync.mjs pull', {
+      cwd: process.cwd(),
+      timeout: 30000
+    });
+
+    if (stderr) {
+      console.error('[SessionStart] Sync stderr:', stderr);
+    }
+
+    console.log('[SessionStart] Memory synced successfully');
+    return true;
+  } catch (err) {
+    // Sync failed - continue anyway with local memory
+    console.error('[SessionStart] Failed to sync memory:', err.message);
+    console.log('[SessionStart] Continuing with local memory');
+    return false;
+  }
+}
+
+async function loadMemory() {
+  try {
+    const memoryPath = join(process.cwd(), 'memory/MEMORY.md');
+    const memory = await readFile(memoryPath, 'utf-8');
+
+    console.log('[SessionStart] Memory loaded successfully');
+    console.log(`[SessionStart] Memory size: ${(memory.length / 1024).toFixed(2)} KB`);
+
+    // Memory is now available for Claude's context
+    return memory;
+  } catch (err) {
+    console.log('[SessionStart] No memory file found (first run?)');
+    return null;
+  }
+}
+
+async function loadDailyLog() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const logPath = join(process.cwd(), `memory/daily/${today}.md`);
+    const log = await readFile(logPath, 'utf-8');
+
+    console.log(`[SessionStart] Today's log loaded (${today})`);
+    return log;
+  } catch (err) {
+    console.log('[SessionStart] No daily log for today yet');
+    return null;
+  }
+}
+
+// Main execution
+async function main() {
+  console.log('[SessionStart] Starting session with memory sync');
+
+  // Pull latest memory from remote (non-blocking - continue if fails)
+  await pullMemory();
+
+  // Load memory for session
+  const memory = await loadMemory();
+  const dailyLog = await loadDailyLog();
+
+  if (memory) {
+    console.log('[SessionStart] ✓ Memory system active');
+  } else {
+    console.log('[SessionStart] ⚠ No memory found - run: node bootup.mjs --subset memory');
+  }
+
+  console.log('[SessionStart] Ready');
+}
+
+main().catch(err => {
+  console.error('[SessionStart] Error:', err);
+  process.exit(1);
+});

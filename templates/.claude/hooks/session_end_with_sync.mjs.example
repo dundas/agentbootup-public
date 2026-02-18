@@ -1,0 +1,87 @@
+#!/usr/bin/env bun
+/**
+ * Claude Code Session End Hook with Memory Sync
+ *
+ * This hook:
+ * 1. Updates daily log with session summary
+ * 2. Pushes memory updates to Mech Storage
+ *
+ * To use:
+ * 1. Rename to session_end.mjs (remove .example)
+ * 2. Configure sync: node memory-sync.mjs config init --mech-app-id=xxx --mech-api-key=xxx
+ * 3. Restart Claude Code
+ */
+
+import { appendFile } from 'fs/promises';
+import { join } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+async function updateDailyLog() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const logPath = join(process.cwd(), `memory/daily/${today}.md`);
+
+    const timestamp = new Date().toISOString();
+    const summary = `
+---
+
+## Session End: ${timestamp}
+
+**CLI**: Claude Code
+
+**Next**: Continue from work queue
+
+`;
+
+    await appendFile(logPath, summary, 'utf-8');
+    console.log('[SessionEnd] Daily log updated');
+    return true;
+  } catch (err) {
+    console.error('[SessionEnd] Failed to update daily log:', err.message);
+    return false;
+  }
+}
+
+async function pushMemory() {
+  try {
+    console.log('[SessionEnd] Pushing memory to remote...');
+
+    const { stdout, stderr } = await execAsync('node memory-sync.mjs push', {
+      cwd: process.cwd(),
+      timeout: 30000
+    });
+
+    if (stderr) {
+      console.error('[SessionEnd] Sync stderr:', stderr);
+    }
+
+    console.log('[SessionEnd] Memory pushed successfully');
+    return true;
+  } catch (err) {
+    // Sync failed - memory still saved locally
+    console.error('[SessionEnd] Failed to push memory:', err.message);
+    console.log('[SessionEnd] Memory saved locally but not synced to remote');
+    return false;
+  }
+}
+
+// Main execution
+async function main() {
+  console.log('[SessionEnd] Ending session with memory sync');
+
+  // Update daily log
+  await updateDailyLog();
+
+  // Push memory to remote (non-blocking - continue if fails)
+  await pushMemory();
+
+  console.log('[SessionEnd] Complete');
+}
+
+main().catch(err => {
+  console.error('[SessionEnd] Error:', err);
+  process.exit(1);
+});

@@ -1,0 +1,58 @@
+{
+  "name": "agentbootup",
+  "version": "0.8.0",
+  "description": "Seed Claude Code, OpenAI Codex, Gemini CLI, and Windsurf development assets (agents, skills, commands, workflows) into any project. Includes memory sync daemon and autonomous transcript analysis.",
+  "type": "module",
+  "bin": {
+    "agentbootup": "bootup.mjs",
+    "memory-sync": "memory-sync.mjs",
+    "memory-sync-daemon": "memory-sync-daemon.mjs",
+    "analyze-transcripts": "analyze-transcripts.mjs"
+  },
+  "files": [
+    "bootup.mjs",
+    "memory-sync.mjs",
+    "memory-sync-daemon.mjs",
+    "analyze-transcripts.mjs",
+    "lib/**",
+    "templates/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "codex",
+    "gemini",
+    "gemini-cli",
+    "windsurf",
+    "bootstrap",
+    "agents",
+    "skills",
+    "workflows"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dundas/agentbootup.git"
+  },
+  "author": "",
+  "scripts": {
+    "dry-run": "node ./bootup.mjs --dry-run --verbose",
+    "sync-templates": "node ./scripts/sync-templates.mjs",
+    "check-templates": "node ./scripts/sync-templates.mjs --check",
+    "public:check": "node ./scripts/public-sync.mjs check",
+    "public:export": "node ./scripts/public-sync.mjs export",
+    "public:promote": "node ./scripts/public-promote.mjs",
+    "test": "node -e 'console.log(\"ok\")'",
+    "brain": "claude --project . /autonomous-bootup",
+    "brain:sync": "memory-sync",
+    "brain:daemon": "memory-sync-daemon --interval 30m"
+  },
+  "devDependencies": {
+    "agentbootup": "^0.8.0"
+  }
+}

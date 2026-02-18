@@ -1,0 +1,33 @@
+/**
+ * Claude Code Session End Hook with Daemon Integration
+ *
+ * This hook is minimal because the daemon handles sync automatically.
+ * If the daemon is not running, it reminds the user to sync manually.
+ *
+ * Setup:
+ * 1. Rename to session_end.js (remove .example)
+ * 2. Restart Claude Code
+ */
+
+import { handleSessionEnd } from '../../lib/hooks/daemon-helper.js';
+
+async function onSessionEnd() {
+  try {
+    const result = await handleSessionEnd({
+      daemonPort: 8765,
+      verbose: true
+    });
+
+    if (!result.daemonHandled) {
+      console.log('[Claude] 💡 Tip: Run "node memory-sync.mjs push" to sync your memory');
+      console.log('[Claude] Or start the daemon for automatic sync: "node memory-sync.mjs daemon start"');
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('[Claude] Session end error:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export { onSessionEnd };

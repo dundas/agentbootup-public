@@ -1,0 +1,17 @@
+# Daily Notes Directory
+
+This directory contains daily conversation logs in the format:
+- YYYY-MM-DD.md
+
+Daily notes are automatically created and maintained.
+They are session-specific and typically not transferred during replication.
+
+To start a new daily note, the memory-manager will create:
+```
+## HH:MM - [Session Type]
+
+**User:** [Request summary]
+**Agent:** [Action taken]
+
+[Details of interaction]
+```

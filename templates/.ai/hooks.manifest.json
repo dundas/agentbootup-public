@@ -1,0 +1,362 @@
+{
+  "$schema": "https://uhr.dev/schema/v1/manifest.json",
+  "version": "1.0.0",
+  "name": "memory-sync-hooks",
+  "description": "Session hooks for memory synchronization with daemon integration",
+  "author": "agentbootup",
+  "hooks": {
+    "session.start": {
+      "description": "Load memory and sync before session starts",
+      "priority": 100,
+      "async": true,
+      "timeout": 30000,
+      "implementations": {
+        "claude": {
+          "file": "../.claude/hooks/session_start_with_daemon.js.example",
+          "export": "onSessionStart",
+          "enabled": false,
+          "notes": "Rename to session_start.js to enable"
+        },
+        "gemini": {
+          "file": "../.gemini/hooks/on_start_with_sync.js.example",
+          "export": "onStart",
+          "enabled": false,
+          "notes": "Rename to on_start.js to enable"
+        },
+        "generic": {
+          "file": "../../lib/hooks/daemon-helper.js",
+          "export": "handleSessionStart",
+          "enabled": true,
+          "notes": "CLI-agnostic helper library"
+        }
+      },
+      "dependencies": {
+        "daemon": {
+          "optional": true,
+          "port": 8765,
+          "host": "localhost",
+          "health_endpoint": "/health"
+        },
+        "config": {
+          "file": ".memory-sync.config.json",
+          "required": true
+        }
+      },
+      "behavior": {
+        "fast_path": {
+          "condition": "daemon_running",
+          "description": "Instant load when daemon is active",
+          "steps": [
+            "Check daemon health",
+            "Load memory from disk",
+            "Return immediately"
+          ]
+        },
+        "fallback_path": {
+          "condition": "daemon_not_running",
+          "description": "Sync once then load",
+          "steps": [
+            "Trigger sync pull",
+            "Wait for sync complete",
+            "Load memory from disk",
+            "Return"
+          ]
+        }
+      },
+      "outputs": {
+        "memory": {
+          "type": "string",
+          "description": "Contents of memory/MEMORY.md"
+        },
+        "dailyLog": {
+          "type": "string",
+          "description": "Contents of today's daily log"
+        },
+        "daemonRunning": {
+          "type": "boolean",
+          "description": "Whether daemon is active"
+        }
+      }
+    },
+    "session.end": {
+      "description": "Graceful session shutdown with sync reminders",
+      "priority": 100,
+      "async": true,
+      "timeout": 5000,
+      "implementations": {
+        "claude": {
+          "file": "../.claude/hooks/session_end_with_daemon.js.example",
+          "export": "onSessionEnd",
+          "enabled": false,
+          "notes": "Rename to session_end.js to enable"
+        },
+        "gemini": {
+          "file": "../.gemini/hooks/on_end_with_daemon.js.example",
+          "export": "onEnd",
+          "enabled": false,
+          "notes": "Rename to on_end.js to enable"
+        },
+        "generic": {
+          "file": "../../lib/hooks/daemon-helper.js",
+          "export": "handleSessionEnd",
+          "enabled": true,
+          "notes": "CLI-agnostic helper library"
+        }
+      },
+      "dependencies": {
+        "daemon": {
+          "optional": true,
+          "port": 8765,
+          "host": "localhost"
+        }
+      },
+      "behavior": {
+        "daemon_running": {
+          "description": "No action needed, daemon handles sync",
+          "steps": [
+            "Check daemon health",
+            "Log daemon status",
+            "Exit"
+          ]
+        },
+        "daemon_not_running": {
+          "description": "Remind user to sync manually",
+          "steps": [
+            "Check daemon health",
+            "Display sync reminder",
+            "Exit"
+          ]
+        }
+      },
+      "outputs": {
+        "daemonHandled": {
+          "type": "boolean",
+          "description": "Whether daemon handled the sync"
+        }
+      }
+    }
+  },
+  "services": {
+    "daemon": {
+      "name": "memory-sync-daemon",
+      "description": "Background service for real-time memory synchronization",
+      "executable": "memory-sync-daemon.mjs",
+      "manager": "memory-sync.mjs daemon",
+      "port": 8765,
+      "host": "localhost",
+      "pid_file": "~/.uhr/daemon/memory-sync.pid",
+      "log_file": "~/.uhr/daemon/memory-sync.log",
+      "api": {
+        "health": {
+          "method": "GET",
+          "path": "/health",
+          "response": {
+            "healthy": "boolean"
+          }
+        },
+        "status": {
+          "method": "GET",
+          "path": "/status",
+          "response": {
+            "running": "boolean",
+            "stats": "object"
+          }
+        },
+        "sync": {
+          "method": "POST",
+          "path": "/sync",
+          "description": "Trigger manual sync",
+          "response": {
+            "success": "boolean",
+            "message": "string"
+          }
+        },
+        "stop": {
+          "method": "POST",
+          "path": "/stop",
+          "description": "Stop daemon gracefully",
+          "response": {
+            "success": "boolean",
+            "message": "string"
+          }
+        }
+      },
+      "lifecycle": {
+        "start": "node memory-sync.mjs daemon start",
+        "stop": "node memory-sync.mjs daemon stop",
+        "status": "node memory-sync.mjs daemon status",
+        "logs": "node memory-sync.mjs daemon logs"
+      }
+    }
+  },
+  "cli": {
+    "executable": "memory-sync.mjs",
+    "commands": {
+      "config": {
+        "description": "Manage sync configuration",
+        "subcommands": {
+          "init": {
+            "description": "Initialize sync config",
+            "options": {
+              "mech-app-id": "Mech Storage app ID",
+              "mech-api-key": "Mech Storage API key"
+            }
+          },
+          "show": {
+            "description": "Display current config"
+          },
+          "validate": {
+            "description": "Validate config and credentials"
+          }
+        }
+      },
+      "push": {
+        "description": "Push local memory to remote"
+      },
+      "pull": {
+        "description": "Pull remote memory to local"
+      },
+      "sync": {
+        "description": "Bidirectional sync (last-write-wins)"
+      },
+      "watch": {
+        "description": "Watch files and sync on changes"
+      },
+      "daemon": {
+        "description": "Manage sync daemon",
+        "subcommands": {
+          "start": {
+            "description": "Start daemon in background"
+          },
+          "stop": {
+            "description": "Stop daemon"
+          },
+          "status": {
+            "description": "Check daemon status"
+          },
+          "logs": {
+            "description": "View daemon logs"
+          }
+        }
+      },
+      "list": {
+        "description": "List files that will be synced"
+      },
+      "status": {
+        "description": "Show sync status"
+      }
+    }
+  },
+  "configuration": {
+    "file": ".memory-sync.config.json",
+    "schema": {
+      "projectId": {
+        "type": "string",
+        "required": true,
+        "description": "Unique project identifier"
+      },
+      "provider": {
+        "type": "string",
+        "enum": ["mech", "local"],
+        "default": "mech",
+        "description": "Storage provider"
+      },
+      "mech": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "required": true,
+            "description": "Mech Storage app ID"
+          },
+          "apiKey": {
+            "type": "string",
+            "required": true,
+            "description": "Mech Storage API key"
+          },
+          "collectionName": {
+            "type": "string",
+            "default": "memory_files",
+            "description": "Storage collection name"
+          }
+        }
+      },
+      "files": {
+        "type": "array",
+        "items": "string",
+        "default": [
+          "memory/**/*.md",
+          ".ai/protocols/**/*.md",
+          ".ai/skills/**/*.md",
+          "CLAUDE.md",
+          "GEMINI.md",
+          "CHANGELOG.md"
+        ],
+        "description": "File patterns to sync"
+      }
+    }
+  },
+  "installation": {
+    "steps": [
+      {
+        "step": 1,
+        "action": "Run bootup installer",
+        "command": "node bootup.mjs --subset memory"
+      },
+      {
+        "step": 2,
+        "action": "Configure sync credentials",
+        "command": "node memory-sync.mjs config init --mech-app-id=xxx --mech-api-key=xxx"
+      },
+      {
+        "step": 3,
+        "action": "Enable hooks",
+        "details": "Rename .example files to remove suffix"
+      },
+      {
+        "step": 4,
+        "action": "Start daemon (optional)",
+        "command": "node memory-sync.mjs daemon start"
+      }
+    ]
+  },
+  "compatibility": {
+    "uhr": {
+      "version": "1.0.0",
+      "compliant": true,
+      "notes": "Designed for future UHR compatibility"
+    },
+    "cli_tools": {
+      "claude-code": {
+        "supported": true,
+        "hooks_dir": ".claude/hooks/",
+        "conventions": {
+          "session_start": "session_start.js",
+          "session_end": "session_end.js"
+        }
+      },
+      "gemini-cli": {
+        "supported": true,
+        "hooks_dir": ".gemini/hooks/",
+        "conventions": {
+          "session_start": "on_start.js",
+          "session_end": "on_end.js"
+        }
+      },
+      "cursor": {
+        "supported": false,
+        "notes": "Not yet tested, should work with generic hooks"
+      },
+      "windsurf": {
+        "supported": false,
+        "notes": "Not yet tested, should work with generic hooks"
+      }
+    }
+  },
+  "metadata": {
+    "created": "2026-02-05",
+    "updated": "2026-02-05",
+    "license": "MIT",
+    "repository": "https://github.com/dundas/agentbootup"
+  }
+}

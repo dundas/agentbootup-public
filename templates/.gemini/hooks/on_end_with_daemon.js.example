@@ -1,0 +1,36 @@
+/**
+ * Gemini CLI Session End Hook with Daemon Integration
+ *
+ * This hook is minimal because the daemon handles sync automatically.
+ * If the daemon is not running, it reminds the user to sync manually.
+ *
+ * Setup:
+ * 1. Rename to on_end.js (remove .example)
+ * 2. Restart Gemini CLI
+ */
+
+import { handleSessionEnd } from '../../lib/hooks/daemon-helper.js';
+
+async function onEnd() {
+  try {
+    const result = await handleSessionEnd({
+      daemonPort: 8765,
+      verbose: false // Use custom logging below
+    });
+
+    if (result.daemonHandled) {
+      console.log('[Gemini] Session ended (daemon synced)');
+    } else {
+      console.log('[Gemini] Session ended');
+      console.log('[Gemini] 💡 Tip: Run "node memory-sync.mjs push" to sync your memory');
+      console.log('[Gemini] Or start the daemon: "node memory-sync.mjs daemon start"');
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('[Gemini] Session end error:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export { onEnd };
