@@ -37,7 +37,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dundas/agentbootup.git"
+    "url": "git+https://github.com/dundas/agentbootup-public.git"
+  },
+  "homepage": "https://github.com/dundas/agentbootup-public#readme",
+  "bugs": {
+    "url": "https://github.com/dundas/agentbootup-public/issues"
   },
   "author": "",
   "scripts": {
