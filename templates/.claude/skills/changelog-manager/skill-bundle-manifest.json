@@ -1,0 +1,38 @@
+{
+  "skill": "changelog-manager",
+  "bundle_version": "1.0.0",
+  "version_id": "changelog-manager@1.0.0+sha256_e483a1c5",
+  "bundle_hash": "sha256:e483a1c56ca9d603ea76c9db79055cc961145e0d1bb363ff1142d2a803c26759",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/changelog-manager.json",
+    "backup_root": ".ai/skills/backups/changelog-manager"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/changelog-manager/SKILL.md",
+      "target": ".claude/skills/changelog-manager/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/changelog-manager/reference.md",
+      "target": ".claude/skills/changelog-manager/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

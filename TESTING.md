@@ -2,6 +2,22 @@
 
 This document describes how to test the memory sync daemon and related components.
 
+## Transcript archive release gate
+
+The archive workflow has a separate fault, privacy, package, and soak gate. It must pass before publishing or deploying transcript archive changes:
+
+```bash
+NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 bun test tests/transcript-archive/ src/server/tests/archive-v2*.test.ts
+bun run smoke:transcript-archive
+bun run soak
+npm test
+node scripts/check-packed-runtime-adapters.mjs
+bun run public:check
+bun run check-templates
+```
+
+The system soak interrupts a multipart upload, resumes after server replacement, reconstructs a deleted local catalog from paginated inventory, rejects duplicate logical versions, deep-verifies storage, restores the exact byte set on a clean machine, and scans outputs/evidence for transcript or credential leakage. See [`docs/TRANSCRIPT_ARCHIVE_RUNBOOK.md`](docs/TRANSCRIPT_ARCHIVE_RUNBOOK.md) for operator commands and release failure handling.
+
 ## Quick Test
 
 Run the automated test suite:

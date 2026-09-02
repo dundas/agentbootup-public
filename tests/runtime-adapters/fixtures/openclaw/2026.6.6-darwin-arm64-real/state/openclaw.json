@@ -1,0 +1,52 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "/private/tmp/agentbootup-openclaw-home/workspace"
+    },
+    "list": [
+      {
+        "id": "main"
+      },
+      {
+        "id": "research",
+        "name": "research",
+        "workspace": "/private/tmp/agentbootup-openclaw-home/workspace-research",
+        "agentDir": "/private/tmp/agentbootup-openclaw-home/.openclaw/agents/research/agent"
+      }
+    ]
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "fixture-only-not-a-secret"
+    },
+    "port": 18789,
+    "bind": "loopback",
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-07-14T16:53:34.532Z",
+    "lastRunVersion": "2026.6.6",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.6.6",
+    "lastTouchedAt": "2026-07-14T17:05:32.469Z"
+  }
+}

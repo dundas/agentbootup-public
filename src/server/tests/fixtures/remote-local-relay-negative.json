@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "parserRejects": [
+    {
+      "name": "malformed_turn_missing_message",
+      "direction": "relay_to_connector",
+      "frame": {
+        "type": "turn.request",
+        "protocolVersion": 1,
+        "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" },
+        "commandId": "cmd-a",
+        "sessionHandle": "rsh_0123456789abcdef"
+      }
+    },
+    {
+      "name": "unknown_frame_type",
+      "direction": "relay_to_connector",
+      "frame": { "type": "session.create", "protocolVersion": 1 }
+    },
+    {
+      "name": "unknown_approval_decision_field",
+      "direction": "relay_to_connector",
+      "frame": {
+        "type": "approval.decision",
+        "protocolVersion": 1,
+        "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" },
+        "sessionHandle": "rsh_0123456789abcdef",
+        "authority": {
+          "tenantId": "tenant-a",
+          "consumerId": "consumer-a",
+          "targetDeviceId": "device-a",
+          "environmentAuthorizationId": "auth_0123456789abcdef",
+          "bindingDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "mountId": "mount-a",
+          "functionalityId": "function-a",
+          "resourceId": "resource-a",
+          "principalId": "environment-principal-a",
+          "mountEpoch": "epoch-a",
+          "runGeneration": "generation-a",
+          "expiresAt": "2026-08-21T12:00:00.000Z",
+          "assurance": "interactive_owner"
+        },
+        "disposition": "allow",
+        "decisionIdempotencyKey": "decision-a",
+        "decider": { "kind": "owner", "principalId": "owner-a", "credentialId": "credential-a" },
+        "resolutionId": "resolution-a",
+        "ownerPrincipalId": "owner-other"
+      }
+    }
+  ],
+  "statefulAdmissionRejects": [
+    { "name": "stale_fence", "direction": "relay_to_connector", "framePayload": { "type": "turn.request", "protocolVersion": 1, "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v0" }, "commandId": "cmd-stale", "sessionHandle": "rsh_0123456789abcdef", "message": "continue" }, "precondition": { "currentAuthorityRevision": "fence-v1" }, "boundary": "stateful_admission", "parserDisposition": "accepts_shape_only", "requiredDisposition": "deny_before_queue_or_dispatch" },
+    { "name": "cross_owner_approval", "direction": "relay_to_connector", "framePayload": { "type": "approval.decision", "protocolVersion": 1, "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" }, "sessionHandle": "rsh_0123456789abcdef", "authority": { "tenantId": "tenant-a", "consumerId": "consumer-a", "targetDeviceId": "device-a", "environmentAuthorizationId": "auth_0123456789abcdef", "bindingDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "mountId": "mount-a", "functionalityId": "function-a", "resourceId": "resource-a", "principalId": "environment-principal-a", "mountEpoch": "epoch-a", "runGeneration": "generation-a", "expiresAt": "2026-08-21T12:00:00.000Z", "assurance": "interactive_owner" }, "disposition": "allow", "decisionIdempotencyKey": "decision-cross-owner", "decider": { "kind": "owner", "principalId": "owner-b", "credentialId": "credential-b" }, "resolutionId": "resolution-a" }, "precondition": { "authorizedOwnerPrincipalId": "owner-a" }, "boundary": "stateful_admission", "parserDisposition": "accepts_shape_only", "requiredDisposition": "deny_before_effect_release" },
+    { "name": "cross_brain_device", "direction": "connector_to_relay", "framePayload": { "type": "device.reauth.proof", "protocolVersion": 1, "fence": { "brainId": "brain-b", "deviceId": "device-a", "authorityRevision": "fence-v1" }, "credentialId": "credential-a", "proofChallengeId": "pop_0123456789abcdef", "purpose": "credential_refresh", "expiresAt": "2026-08-21T12:00:00.000Z", "rotationId": "rotation-a", "signatureAlgorithm": "ed25519", "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }, "precondition": { "credentialBrainId": "brain-a" }, "boundary": "stateful_admission", "parserDisposition": "accepts_shape_only", "requiredDisposition": "deny_before_socket_or_refresh" },
+    { "name": "dead_or_unadvertised_session_handle", "direction": "relay_to_connector", "framePayload": { "type": "turn.request", "protocolVersion": 1, "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" }, "commandId": "cmd-dead", "sessionHandle": "rsh_abcdef0123456789", "message": "continue" }, "precondition": { "advertisedSessionHandles": [] }, "boundary": "stateful_admission", "parserDisposition": "accepts_shape_only", "requiredDisposition": "no_active_session_before_queue_or_dispatch" },
+    { "name": "replayed_command", "direction": "relay_to_connector", "framePayload": { "type": "turn.request", "protocolVersion": 1, "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" }, "commandId": "cmd-replayed", "sessionHandle": "rsh_0123456789abcdef", "message": "continue" }, "precondition": { "durableCommandReceipt": "cmd-replayed" }, "boundary": "durable_command_receipt", "parserDisposition": "accepts_shape_only", "requiredDisposition": "prior_receipt_or_conflict_without_redispatch" },
+    { "name": "replayed_or_already_resolved_approval_decision", "direction": "relay_to_connector", "framePayload": { "type": "approval.decision", "protocolVersion": 1, "fence": { "brainId": "brain-a", "deviceId": "device-a", "authorityRevision": "fence-v1" }, "sessionHandle": "rsh_0123456789abcdef", "authority": { "tenantId": "tenant-a", "consumerId": "consumer-a", "targetDeviceId": "device-a", "environmentAuthorizationId": "auth_0123456789abcdef", "bindingDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "mountId": "mount-a", "functionalityId": "function-a", "resourceId": "resource-a", "principalId": "environment-principal-a", "mountEpoch": "epoch-a", "runGeneration": "generation-a", "expiresAt": "2026-08-21T12:00:00.000Z", "assurance": "interactive_owner" }, "disposition": "deny", "decisionIdempotencyKey": "decision-replayed", "decider": { "kind": "owner", "principalId": "owner-a", "credentialId": "credential-a" }, "resolutionId": "resolution-b" }, "precondition": { "durableFirstResolutionClaim": "already_allow" }, "boundary": "durable_first_resolution_claim", "parserDisposition": "accepts_shape_only", "requiredDisposition": "replayed_receipt_or_intent_already_resolved_without_effect_release" }
+  ],
+  "oversized": { "name": "raw_utf8_frame_overflow", "boundary": "untrusted_parser", "input": "max_frame_bytes_plus_one", "expectedCode": "frame_too_large" },
+  "privacyExcludedFromInventoryAndAudit": [
+    "native_session_title",
+    "prompt_text",
+    "repository",
+    "workspace",
+    "path",
+    "process_arguments",
+    "transcript_metadata"
+  ]
+}

@@ -1,0 +1,261 @@
+name: Test Suite
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  # The declared suite (`npm test`) is two phases. Phase 1 is the blocking gate. Phase 2
+  # (tests/daemon/) drives a real process supervisor and binds real sockets, and does not
+  # come up on a GitHub runner on either platform — see the advisory job below.
+  test-portable:
+    name: npm test (phase 1)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      AGENTBOOTUP_ALLOW_TEST_SESSION: '1'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1'
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Mirrors the first half of `npm test` EXACTLY — keep this path list and the one in
+      # package.json in lockstep. It previously omitted tests/auth/ and named only
+      # tests/provision.test.ts while claiming to mirror, so five root-level suites
+      # (including tests/brain-msg-wrapper.test.ts, red since 871fb3d) never ran in CI.
+      #
+      # The glob is tests/*.test.* (catches both .test.ts and .test.mjs). The earlier
+      # tests/*.test.ts-only glob left the 21 root-level tests/*.test.mjs files outside CI;
+      # that gap was held open by 7 pre-existing failures in tests/cli-router.test.mjs.
+      # Those failures are now fixed on main, so the glob is widened to tests/*.test.* and
+      # all 47 root-level test files (26 .ts + 21 .mjs) run in CI. Verified green on macOS:
+      # 2966 pass, 0 fail across 162 files (the symlink-rollback test runs there). Linux CI
+      # shows 2965 pass + 1 skip — see the annotated platform gate in tests/bundle-cli.test.mjs
+      # (installBundle rollback preserves symlinked node_modules entries). No cross-file
+      # interference. No per-file exclusions or explicit .mjs entries remain.
+      - name: Run the portable half of the declared suite
+        run: bun test src/server/tests/ tests/auth/ tests/setup/ tests/brain/ tests/doctor/ tests/transcript-archive/ tests/*.test.* lib/daemon/redaction-denylist.test.js scripts/append-redact-denylist.test.js
+
+      # PRD-0052A evidence-only gate. This runs on Linux because Windows remains explicitly
+      # unsupported; it proves Windows-sensitive inputs fail closed, not runtime support.
+      - name: Run runtime-adapter contract and fixture baseline
+        run: |
+          bun test tests/runtime-adapters/
+          node scripts/check-runtime-fixture-drift.mjs
+
+  runtime-adapter-node:
+    name: Runtime adapter package (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Verify evidence-only fixture drift
+        run: node scripts/check-runtime-fixture-drift.mjs
+
+      - name: Pack and import every shipped runtime-adapter module
+        run: node scripts/check-packed-runtime-adapters.mjs
+
+  transcript-archive-soak:
+    name: transcript archive soak
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_ENV: test
+      AGENTBOOTUP_ALLOW_TEST_SESSION: '1'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1'
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run the blocking transcript archive soak
+        run: bun test tests/soak/transcript-archive.soak.test.ts --timeout 180000
+
+  # tests/daemon/ does not pass on a GitHub runner, on EITHER platform: the spawned
+  # inbox daemon never comes up (ConnectionRefused), and the restart tests need a
+  # launchd user domain a sandboxed runner does not have. 36 failures, identical on
+  # ubuntu-latest and macos-latest — this is an environment dependency, not a platform
+  # one, and it predates this workflow (nothing ever ran the suite in CI).
+  #
+  # It runs advisory rather than blocking: a gate that is red on arrival teaches
+  # everyone to ignore CI, and deleting the job would hide the failures we want driven
+  # to zero. The first thing to fix is that the test discards the daemon's stderr, so
+  # CI cannot say WHY it failed to start (task-2026-07-09-015). Flip to blocking then.
+  test-daemon:
+    name: npm test (phase 2, daemon — advisory)
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      AGENTBOOTUP_ALLOW_TEST_SESSION: '1'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1'
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Deliberately exits 0. `continue-on-error` would still publish a RED check-run,
+      # which reads as a broken gate and can trip branch protection. This step reports
+      # the result into the job summary instead, so the failures are visible and
+      # trending without pretending they gate anything yet.
+      - name: Run the daemon phase (advisory, never fails the check)
+        run: |
+          set +e
+          bun test tests/daemon/ 2>&1 | tee daemon.log
+          set -e
+
+          PASS=$(grep -Eo '^ [0-9]+ pass' daemon.log | tail -1 | tr -dc '0-9')
+          FAIL=$(grep -Eo '^ [0-9]+ fail' daemon.log | tail -1 | tr -dc '0-9')
+          PASS=${PASS:-0}; FAIL=${FAIL:-0}
+
+          {
+            echo "### Daemon phase (advisory)"
+            echo ""
+            echo "| result | count |"
+            echo "|---|---|"
+            echo "| pass | ${PASS} |"
+            echo "| fail | ${FAIL} |"
+            echo ""
+            if [ "$(( PASS + FAIL ))" -eq 0 ]; then
+              echo "**Could not parse the test summary.** \`bun test\`'s output format may"
+              echo "have changed, or colour codes leaked into the log. This is NOT a green"
+              echo "result — it is an unknown one. Fix the parsing rather than trusting it."
+            elif [ "${FAIL}" -gt 0 ]; then
+              echo "These do not gate merges yet. \`tests/daemon/\` does not come up on a"
+              echo "GitHub runner on either platform: the spawned inbox daemon never binds"
+              echo "(ConnectionRefused) and the restart tests need a launchd user domain."
+              echo "The suite also discards the daemon's stderr, so the cause is not"
+              echo "recoverable from these logs. See task-2026-07-09-015."
+              echo ""
+              echo "<details><summary>Failing tests</summary>"
+              echo ""
+              echo '```'
+              grep -E '^\(fail\)' daemon.log | head -40
+              echo '```'
+              echo "</details>"
+            else
+              echo "All green — this job is ready to be promoted to a blocking gate."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit 0
+
+  hermetic:
+    name: suite writes no machine identity into $HOME
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1'
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The suite must never touch the real ~/.agentbootup. getMachineId() creates
+      # ~/.agentbootup/machine-id on the host when absent, and that UUID is both the
+      # telemetry attribution id and (since the credentials store was rebound to it)
+      # what the at-rest encryption key derives from. A test run must not decide who a
+      # machine is. This has regressed twice; assert it rather than trusting discipline.
+      # Covers every path the declared suite covers, plus the rest of tests/. The wider
+      # net matters: the leak only reproduces once a file that mints runs after a file
+      # that clears AGENTBOOTUP_MACHINE_ID_FILE, and `npm test`'s narrower path list
+      # happens not to contain that ordering today, so a gate built on it could not fail.
+      # A gate that cannot fail is worse than no gate. Test outcomes are ignored here
+      # (`|| true`) -- the `test` job above owns pass/fail; this job owns the assertion.
+      #
+      # What is asserted: nothing lands in $HOME. Minting into the preloaded temp path
+      # (tests/setup/hermetic-machine-id.ts) is the intended behaviour and is NOT a
+      # failure -- that preload is what keeps the identity out of $HOME in the first
+      # place. This job is the backstop for the preload being removed, bypassed, or
+      # cleared by a test file, in which case getMachineId() falls through to
+      # $HOME/.agentbootup/machine-id and this check catches it.
+      - name: Run the suite against a throwaway HOME
+        env:
+          NODE_ENV: test
+          AGENTBOOTUP_ALLOW_TEST_SESSION: '1'
+        run: |
+          FAKE_HOME="$(mktemp -d)"
+          HOME="$FAKE_HOME" bun test src/server/tests/ tests/ || true
+
+          echo "--- artifacts left under the throwaway HOME ---"
+          find "$FAKE_HOME" -mindepth 1 -maxdepth 2 2>/dev/null || true
+
+          if [ -e "$FAKE_HOME/.agentbootup/machine-id" ]; then
+            echo "::error::The test suite wrote a machine identity into \$HOME."
+            echo "getMachineId() creates \$HOME/.agentbootup/machine-id when absent. That UUID"
+            echo "is the telemetry attribution id AND what the at-rest credential key derives"
+            echo "from, so a test run must never mint it on a real machine. Here \$HOME was a"
+            echo "throwaway directory; on a developer's box it would have been their own."
+            echo ""
+            echo "Likely cause: the bunfig.toml preload was removed, or a test file deleted"
+            echo "AGENTBOOTUP_MACHINE_ID_FILE instead of restoring it. bun test shares one"
+            echo "process across files, so the next file falls through to the real default."
+            echo "See tests/setup/hermetic-machine-id.ts and tests/setup/machine-id-env.mjs."
+            exit 1
+          fi
+          echo "OK: no machine identity was written into \$HOME."

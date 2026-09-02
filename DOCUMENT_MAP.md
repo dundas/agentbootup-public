@@ -89,6 +89,8 @@ project-root/
 
 ### Runbooks
 - **Single Project Runbook:** `RUNBOOK.md` (repository root)
+- **Transcript Archive Operations:** `docs/TRANSCRIPT_ARCHIVE_RUNBOOK.md`
+- **Transcript Archive Production Evidence:** `docs/TRANSCRIPT_ARCHIVE_PRODUCTION_EVIDENCE.md`
 - **Multi-Service Runbooks:** `docs/runbooks/[service-name]-runbook.md`
 - **Example:**
   - Simple: `RUNBOOK.md` (root)

@@ -1,0 +1,107 @@
+{
+  "schema": "agentbootup.hermes-m0h-evidence-policy/v1",
+  "retentionMaxDays": 7,
+  "dependencies": [
+    "lib/runtime-adapters/classifier.js",
+    "lib/runtime-adapters/security.js",
+    "lib/runtime-adapters/types.js"
+  ],
+  "tracked": {
+    "maxFileBytes": 65536,
+    "maxTotalBytes": 900000,
+    "members": [
+      { "path": ".github/workflows/hermes-m0h-qualification.yml", "redistribution": "source_repository_only" },
+      { "path": "config/hermes-m0h-closure-authority-v1.json", "redistribution": "project_authored_facts_only" },
+      { "path": "config/hermes-m0h-evidence-policy-v1.json", "redistribution": "source_repository_only" },
+      { "path": "config/runtime-adapter-support-matrix-v1.json", "redistribution": "project_authored_facts_only" },
+      { "path": "lib/runtime-adapters/fixture-drift.js", "redistribution": "source_repository_only" },
+      { "path": "lib/runtime-adapters/registry.js", "redistribution": "source_repository_only" },
+      { "path": "package.json", "redistribution": "npm_package_metadata" },
+      { "path": "scripts/runtime-adapters/check-hermes-m0h-evidence.mjs", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-ci-offline.sh", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-database-probe.py", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-full-backup-probe.py", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-offline-install.py", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-ownership-census.mjs", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-probe.mjs", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-profile-transfer-probe.py", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-project-evidence.mjs", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-quiescence-probe.py", "redistribution": "source_repository_only" },
+      { "path": "scripts/runtime-adapters/hermes-m0h-synthetic-install.mjs", "redistribution": "source_repository_only" },
+      { "path": "tasks/0052e-hermes-capture-strategy-decision.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-evidence-policy.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-database-safety.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-feasibility-spike.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-full-backup.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-linux-evidence.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-outcome.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-ownership-census.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-probe-harness.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-profile-transfer.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-quiescence.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-regression-coverage.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-m0h-synthetic-install.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-qualification-lanes.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-hermes-v019-pin-evidence.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/0052e-prd-hermes-runtime-adapter.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tasks/tasks-0052e-prd-hermes-runtime-adapter.md", "redistribution": "project_authored_facts_only" },
+      { "path": "tests/runtime-adapters/fixture-drift.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/fixtures/hermes-m0h-evidence-forbidden.json", "redistribution": "project_authored_facts_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-database-probe.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-evidence-policy.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-full-backup-probe.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-ownership-census.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-probe.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-project-evidence.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-quiescence-probe.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/hermes-m0h-synthetic-install.test.ts", "redistribution": "source_repository_only" },
+      { "path": "tests/runtime-adapters/support-matrix.test.ts", "redistribution": "source_repository_only" }
+    ]
+  },
+  "artifacts": {
+    "maxFileBytes": 32768,
+    "maxTotalBytes": 131072,
+    "members": [
+      { "name": "artifact-preflight-report.json", "schema": "agentbootup.hermes-probe/v1" },
+      { "name": "closure-manifest.json", "schema": "agentbootup.hermes-wheelhouse/v1" },
+      { "name": "database-report.json", "schema": "agentbootup.hermes-m0h-database/v1" },
+      { "name": "full-backup-report.json", "schema": "agentbootup.hermes-m0h-full-backup/v1" },
+      { "name": "offline-install-receipt.json", "schema": "agentbootup.hermes-offline-install/v1" },
+      { "name": "profile-list-report.json", "schema": "agentbootup.hermes-probe/v1" },
+      { "name": "profile-transfer-report.json", "schema": "agentbootup.hermes-m0h-profile-transfer/v1" },
+      { "name": "quiescence-report.json", "schema": "agentbootup.hermes-m0h-quiescence/v1" },
+      { "name": "runner-context.json", "schema": "agentbootup.hermes-m0h-runner-context/v1" },
+      { "name": "synthetic-report.json", "schema": "agentbootup.hermes-synthetic-install/v1" }
+    ]
+  },
+  "content": {
+    "forbiddenExtensions": [
+      ".bz2", ".db", ".db-shm", ".db-wal", ".env", ".gz", ".journal", ".key",
+      ".log", ".pem", ".sqlite", ".sqlite3", ".tar", ".tgz", ".whl", ".xz",
+      ".zip", ".zst"
+    ],
+    "forbiddenMagicHex": [
+      "1f8b08", "28b52ffd", "425a68", "4d5a", "504b0304", "504b0506",
+      "504b0708", "53514c69746520666f726d6174203300", "7f454c46",
+      "cafebabe", "cffaedfe", "fd377a585a00", "feedfacf"
+    ],
+    "forbiddenTextPatterns": [
+      "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+      "SYNTHETIC_SECRET_DO_NOT_USE_",
+      "(?:^|[^A-Za-z0-9_])(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{16,}",
+      "(?:^|[^A-Za-z0-9_])(?:\\.env|auth\\.json)(?:$|[^A-Za-z0-9_])",
+      "(?:mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis)://[^\\s\"']+",
+      "(?:/home/runner|/private/tmp|/var/tmp/hermes-m0h\\.|[A-Za-z]:\\\\Users\\\\)"
+    ],
+    "trackedForbiddenTextPatterns": [
+      "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+      "(?:^|[^A-Za-z0-9_])(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{32,}",
+      "(?:mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis)://[^\\s\"']+"
+    ],
+    "json": {
+      "maxDepth": 32,
+      "maxKeys": 20000,
+      "maxStringBytes": 262144
+    }
+  }
+}

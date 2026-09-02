@@ -1,0 +1,534 @@
+{
+  "schemaVersion": "agentbootup.mech-plane-runtime-approval-qualification.v2",
+  "verdict": "GO",
+  "source": {
+    "repository": "dundas/mech-plane",
+    "commit": "ab4c156313d6d5b43c00edf5458e2e3a38ab3e6c",
+    "directParent": "3822a1bc9a27ac402414de708c8f9f8d781979df",
+    "cleanBefore": true,
+    "cleanAfter": true
+  },
+  "qualifier": {
+    "sourceSha256": "5b304d704fc9c5c45fbc86cdca79f973a3dbe75b160373d8314dfd6624f20592"
+  },
+  "integrityTuple": {
+    "platform": {
+      "os": "linux",
+      "architecture": "arm64",
+      "kernelArchitecture": "aarch64"
+    },
+    "runtime": {
+      "bun": "1.3.14",
+      "node": "24.3.0",
+      "codexCli": "0.148.0"
+    },
+    "packages": {
+      "mechRun": {
+        "identity": "@mech/run@0.4.6",
+        "integrity": "sha512-O3spSfiBHBJo7K3JDFuCEt/g5Cn0gtEwxTNNH7Rzzs+eV01Rg44gVFS71JIfKcfye3Wv4cN3i+lMoA1Llah8ng==",
+        "verified": true
+      },
+      "codexLauncher": {
+        "identity": "@openai/codex@0.148.0",
+        "integrity": "sha512-bh5kH9+BMrFaHGmLeoSansPdfRksvr4UXzjQInns/KRO7r8VJ+6AAW+SqUsE8XcG3+OW/mI4EEy8Gpo9UDXGvQ==",
+        "verified": true
+      },
+      "codexLinuxArm64": {
+        "identity": "@openai/codex@0.148.0-linux-arm64",
+        "integrity": "sha512-51DCd+izzk6n4mMh4w2utWj3lTLhSTnCOEJQfRh0LS9nBDkcYZcK3iSKOST6fByRIlLSXuLO33LlYYA1VPot6A==",
+        "verified": true
+      }
+    }
+  },
+  "eventStream": [
+    {
+      "event": "preflight_passed",
+      "outsideBaseReady": true,
+      "codexCliReady": true,
+      "codexAuthenticated": true,
+      "codexCliVersion": "0.148.0",
+      "modelSource": "ambient"
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 1,
+      "mode": "allow",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 1,
+      "mode": "allow",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 1,
+      "mode": "allow",
+      "approvalRequested": true
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 1,
+      "mode": "allow",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 1,
+      "mode": "allow",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 1,
+      "mode": "allow",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 1,
+      "mode": "allow",
+      "attempt": 1,
+      "approvalRequestCount": 2,
+      "approvalDecisionsSubmitted": 2,
+      "approvalDecisionsAccepted": 2
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 1,
+      "mode": "deny",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 1,
+      "mode": "deny",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 1,
+      "mode": "deny",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 1,
+      "mode": "deny",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 1,
+      "mode": "deny",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 1,
+      "approvalDecisionsAccepted": 1
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 1,
+      "mode": "expiry",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 1,
+      "mode": "expiry",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 1,
+      "mode": "expiry",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 1,
+      "mode": "expiry",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 1,
+      "mode": "expiry",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 0,
+      "approvalDecisionsAccepted": 0
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 1,
+      "mode": "disconnect",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 1,
+      "mode": "disconnect",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 1,
+      "mode": "disconnect",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 1,
+      "mode": "disconnect",
+      "attempt": 1,
+      "stopReason": "cancelled",
+      "exitCode": null
+    },
+    {
+      "event": "case_observed",
+      "cycle": 1,
+      "mode": "disconnect",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 0,
+      "approvalDecisionsAccepted": 0
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 2,
+      "mode": "allow",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 2,
+      "mode": "allow",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 2,
+      "mode": "allow",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 2,
+      "mode": "allow",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 2,
+      "mode": "allow",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 1,
+      "approvalDecisionsAccepted": 1
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 2,
+      "mode": "deny",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 2,
+      "mode": "deny",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 2,
+      "mode": "deny",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 2,
+      "mode": "deny",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 2,
+      "mode": "deny",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 1,
+      "approvalDecisionsAccepted": 1
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 2,
+      "mode": "expiry",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 2,
+      "mode": "expiry",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 2,
+      "mode": "expiry",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 2,
+      "mode": "expiry",
+      "attempt": 1,
+      "stopReason": "end_turn",
+      "exitCode": 0
+    },
+    {
+      "event": "case_observed",
+      "cycle": 2,
+      "mode": "expiry",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 0,
+      "approvalDecisionsAccepted": 0
+    },
+    {
+      "event": "spawn_started",
+      "cycle": 2,
+      "mode": "disconnect",
+      "attempt": 1
+    },
+    {
+      "event": "native_tool_observed",
+      "cycle": 2,
+      "mode": "disconnect",
+      "nativeToolObserved": true
+    },
+    {
+      "event": "approval_requested",
+      "cycle": 2,
+      "mode": "disconnect",
+      "approvalRequested": true
+    },
+    {
+      "event": "spawn_finished",
+      "cycle": 2,
+      "mode": "disconnect",
+      "attempt": 1,
+      "stopReason": "cancelled",
+      "exitCode": null
+    },
+    {
+      "event": "case_observed",
+      "cycle": 2,
+      "mode": "disconnect",
+      "attempt": 1,
+      "approvalRequestCount": 1,
+      "approvalDecisionsSubmitted": 0,
+      "approvalDecisionsAccepted": 0
+    }
+  ],
+  "finalSummary": {
+    "schemaVersion": "mech-plane.runtime-approval-soak.v2",
+    "startedAt": "2026-08-20T19:56:23.859Z",
+    "completedAt": "2026-08-20T19:57:49.478Z",
+    "runtime": {
+      "package": "@mech/run",
+      "version": "0.4.6",
+      "provider": "codex",
+      "outsideBaseReady": true,
+      "codexCliReady": true,
+      "codexAuthenticated": true,
+      "codexCliVersion": "0.148.0",
+      "modelSource": "ambient"
+    },
+    "cycles": 2,
+    "passed": true,
+    "results": [
+      {
+        "cycle": 1,
+        "mode": "allow",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": true,
+          "decision": "once",
+          "reason": "resolved"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": true,
+        "approvalRequestCount": 2,
+        "approvalDecisionsSubmitted": 2,
+        "approvalDecisionsAccepted": 2,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 1,
+        "mode": "deny",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "resolved"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 1,
+        "approvalDecisionsAccepted": 1,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 1,
+        "mode": "expiry",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "expired"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 0,
+        "approvalDecisionsAccepted": 0,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 1,
+        "mode": "disconnect",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "cancelled"
+        },
+        "runtime": {
+          "stopReason": "cancelled",
+          "exitCode": null
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 0,
+        "approvalDecisionsAccepted": 0,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 2,
+        "mode": "allow",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": true,
+          "decision": "once",
+          "reason": "resolved"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": true,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 1,
+        "approvalDecisionsAccepted": 1,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 2,
+        "mode": "deny",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "resolved"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 1,
+        "approvalDecisionsAccepted": 1,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 2,
+        "mode": "expiry",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "expired"
+        },
+        "runtime": {
+          "stopReason": "end_turn",
+          "exitCode": 0
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 0,
+        "approvalDecisionsAccepted": 0,
+        "nativeToolObserved": true
+      },
+      {
+        "cycle": 2,
+        "mode": "disconnect",
+        "approvalRequested": true,
+        "bindingDigestPresent": true,
+        "expiryPresent": true,
+        "approvalOutcome": {
+          "approved": false,
+          "decision": "deny",
+          "reason": "cancelled"
+        },
+        "runtime": {
+          "stopReason": "cancelled",
+          "exitCode": null
+        },
+        "effectObserved": false,
+        "approvalRequestCount": 1,
+        "approvalDecisionsSubmitted": 0,
+        "approvalDecisionsAccepted": 0,
+        "nativeToolObserved": true
+      }
+    ]
+  },
+  "exitCode": 0,
+  "caseFailures": []
+}

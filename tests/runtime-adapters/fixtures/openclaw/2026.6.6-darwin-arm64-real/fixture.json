@@ -1,0 +1,61 @@
+{
+  "fixture_version": 1,
+  "runtime_family": "openclaw",
+  "runtime_version": "2026.6.6",
+  "runtime_commit": "8c802aa683510c7f7503597b54c3021733245e59",
+  "package_integrity": "sha512-oMYoQ8a7zummw1tD+AX98yYLzqoq0tQmYWHG65AA0ZivgzmOb2oD0cVdhcWP9IT3opkHdJ5vBdWywUe6xWQXtw==",
+  "platform": {"os": "darwin", "os_version": "14", "architecture": "arm64", "node": "22.23.1"},
+  "generated": true,
+  "sanitized": true,
+  "credential_policy": "generated_token_replaced_with_literal_fixture_value",
+  "artifacts": {
+    "state/openclaw.sqlite": "sha256:3aa9642c5eb908b3fb7ce8feed9cd8ce0820507736022ccea57a93281adc1f69",
+    "native/openclaw-backup.tar.gz": "sha256:f5094b438073538674a73242ec9a88afecce987bbd99423724b3e52139787bcb"
+  },
+  "tree_integrity": {
+    "algorithm": "sha256",
+    "digest": "b7aed5fa3b3ad099a7d2c4c26cb050a3b86154ed3ce867cbbb53b511e79f471e",
+    "files": [
+      "state/openclaw.json",
+      "state/openclaw.sqlite",
+      "state/openclaw.sqlite-shm",
+      "state/openclaw.sqlite-wal",
+      "workspace/.openclaw/workspace-state.json",
+      "workspace/AGENTS.md",
+      "workspace/BOOTSTRAP.md",
+      "workspace/HEARTBEAT.md",
+      "workspace/IDENTITY.md",
+      "workspace/SOUL.md",
+      "workspace/TOOLS.md",
+      "workspace/USER.md",
+      "workspace-research/.openclaw/workspace-state.json",
+      "workspace-research/AGENTS.md",
+      "workspace-research/BOOTSTRAP.md",
+      "workspace-research/HEARTBEAT.md",
+      "workspace-research/IDENTITY.md",
+      "workspace-research/SOUL.md",
+      "workspace-research/TOOLS.md",
+      "workspace-research/USER.md"
+    ]
+  },
+  "expected_classes": {
+    "portable_core": ["workspace/AGENTS.md", "workspace/SOUL.md", "workspace/USER.md", "workspace/IDENTITY.md", "workspace/TOOLS.md", "workspace/HEARTBEAT.md", "workspace-research/AGENTS.md", "workspace-research/SOUL.md", "workspace-research/USER.md", "workspace-research/IDENTITY.md", "workspace-research/TOOLS.md", "workspace-research/HEARTBEAT.md"],
+    "runtime_state": ["state/openclaw.json", "state/openclaw.sqlite"],
+    "secret": ["state/openclaw.json#/gateway/auth/token"],
+    "external_state": [],
+    "reproducible": [],
+    "machine_local": ["workspace/.openclaw/workspace-state.json", "workspace-research/.openclaw/workspace-state.json"],
+    "cache": ["state/openclaw.sqlite-wal", "state/openclaw.sqlite-shm"],
+    "manual_review": ["workspace/BOOTSTRAP.md", "workspace-research/BOOTSTRAP.md"]
+  },
+  "native_archive_observations": {
+    "has_native_restore": false,
+    "includes_workspace_git_directory": true,
+    "encodes_absolute_source_paths": true,
+    "manifest_has_per_file_checksums": false
+  },
+  "native_archive_integrity": {
+    "members": 88,
+    "membership_sha256": "892f63b5d70bb1039f501634d7fce66d5e82d916b1ab341b2f95a86bcec7bb4d"
+  }
+}

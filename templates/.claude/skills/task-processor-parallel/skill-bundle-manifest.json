@@ -1,0 +1,31 @@
+{
+  "skill": "task-processor-parallel",
+  "bundle_version": "1.0.0",
+  "version_id": "task-processor-parallel@1.0.0+sha256_8a7445b2",
+  "bundle_hash": "sha256:8a7445b25b8434256f6234d5beb9848cc8009e0f22080c2448a56803a6b8df9a",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/task-processor-parallel.json",
+    "backup_root": ".ai/skills/backups/task-processor-parallel"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/task-processor-parallel/SKILL.md",
+      "target": ".claude/skills/task-processor-parallel/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

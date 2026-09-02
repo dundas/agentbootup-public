@@ -1,0 +1,31 @@
+{
+  "skill": "design-system-implementation",
+  "bundle_version": "1.0.0",
+  "version_id": "design-system-implementation@1.0.0+sha256_a64774a5",
+  "bundle_hash": "sha256:a64774a5b4f7bbd194592be549bb81a231155f40b46ee33058710664ad9b8e3c",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/design-system-implementation.json",
+    "backup_root": ".ai/skills/backups/design-system-implementation"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/design-system-implementation/SKILL.md",
+      "target": ".claude/skills/design-system-implementation/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}
