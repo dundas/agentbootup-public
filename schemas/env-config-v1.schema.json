@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/env-config-v1.schema.json",
+  "$comment": "$id is a logical identifier only. Keep env-config-v01.schema.json for backward compatibility.",
+  "title": "agentbootup Environment Config v1",
+  "description": "L2 environment contract v1. Canonical successor to env-config v0.1. Legacy v0.1 configs are loaded through a compatibility mapper rather than by mutating the v0.1 schema in place.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "environment",
+    "brains",
+    "environment_skills",
+    "secret_source",
+    "routing"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+(\\.[0-9]+)?$",
+      "examples": ["1.0"]
+    },
+    "environment": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "brains": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "environment_skills": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "optional": { "type": "boolean", "default": false }
+      }
+    },
+    "hooks_dir": {
+      "type": "string",
+      "description": "Path to UHR-compatible hooks directory, relative to the env config file. agentbootup resolves it with a no-escape guard before hook installation."
+    },
+    "mount_base": {
+      "type": "string",
+      "description": "Optional durable host workspace base/pattern hint. When set, the leaf path segment must include the literal token <id>."
+    },
+    "local_tools_path": {
+      "type": ["string", "null"]
+    },
+    "secret_source": {
+      "type": "object",
+      "required": ["provider", "namespace"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string", "enum": ["mech-vault"] },
+        "namespace": { "type": "string", "pattern": "^[a-zA-Z0-9-]+$" }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "required": ["provider", "endpoint"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string", "enum": ["mech-plane"] },
+        "endpoint": { "type": "string", "format": "uri" },
+        "approval_mode": {
+          "type": "string",
+          "enum": ["full-auto", "confidence", "manual"]
+        }
+      }
+    },
+    "approval_flow": {
+      "description": "Optional in v1. Default is \"none\". Use mode \"orchestrate\" when mech-plane orchestration owns approval flow, or mode \"teleporter_hook\" when parent-session mediated approval is required.",
+      "default": "none",
+      "oneOf": [
+        { "type": "string", "enum": ["none", "orchestrate", "teleporter_hook"] },
+        {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": { "type": "string", "enum": ["none", "orchestrate", "teleporter_hook"] },
+            "endpoint": { "type": "string" },
+            "parent_session_id_var": { "type": "string" }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "mode": { "const": "none" } },
+                "required": ["mode"]
+              },
+              "then": {
+                "not": {
+                  "anyOf": [
+                    { "required": ["endpoint"] },
+                    { "required": ["parent_session_id_var"] }
+                  ]
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": { "mode": { "const": "orchestrate" } },
+                "required": ["mode"]
+              },
+              "then": {
+                "not": { "required": ["parent_session_id_var"] }
+              }
+            },
+            {
+              "if": {
+                "properties": { "mode": { "const": "teleporter_hook" } },
+                "required": ["mode"]
+              },
+              "then": {
+                "not": { "required": ["endpoint"] }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

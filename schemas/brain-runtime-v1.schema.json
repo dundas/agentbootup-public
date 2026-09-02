@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/brain-runtime-v1.schema.json",
+  "$comment": "$id is a logical identifier only. This is the L3 runtime/wake policy contract; wake delivery semantics are Phase B.",
+  "title": "agentbootup Brain Runtime v1",
+  "type": "object",
+  "required": ["schema_version", "runtime", "max_execution_ms"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+(\\.[0-9]+)?$"
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["required"],
+      "additionalProperties": true,
+      "properties": {
+        "required": {
+          "type": "object",
+          "description": "Runtime requirements keyed by runtime name, using semver/range strings. Example: { \"bun\": \">=1.3.0\" }.",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "max_execution_ms": {
+      "type": "integer",
+      "minimum": 1000,
+      "description": "Brain runtime execution budget. Environment request timeouts may be lower but must not exceed this cap when enforced."
+    },
+    "wake_policy": {
+      "type": "object",
+      "description": "Wake policy contract ownership only. Push vs poll trigger delivery semantics are deferred to Phase B.",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "contract": { "type": "string", "enum": ["phase-b-deferred"] }
+      }
+    },
+    "mount_target": {
+      "$ref": "#/$defs/agentLocation"
+    },
+    "state_tree": {
+      "type": "object",
+      "description": "Additive state tree materialization hints for agent-host runtimes.",
+      "additionalProperties": true,
+      "properties": {
+        "volume_strategy": {
+          "type": "string",
+          "enum": ["fly_volume_fork", "local_worktree"]
+        }
+      }
+    },
+    "agent_host": {
+      "type": "object",
+      "description": "Agent-host runtime integration references. Values are references only and must not contain raw secret material.",
+      "additionalProperties": false,
+      "required": ["internal_auth_token_ref"],
+      "properties": {
+        "internal_auth_token_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\s/]+(?:/[^\\s/]+)+$",
+          "description": "Vault path reference for the pre-shared agent-host internal auth token, for example agent-host/staging/AGENT_HOST_SHARED_KEY."
+        }
+      }
+    },
+    "env_var_refs": {
+      "type": "object",
+      "description": "Environment variable references keyed by env var name. Values must be vault path references, never inline values.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["vault_ref"],
+        "additionalProperties": false,
+        "properties": {
+          "vault_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\s/]+(?:/[^\\s/]+)+$"
+          }
+        }
+      }
+    },
+    "env_allowlist": {
+      "type": "array",
+      "description": "Environment variables the runtime may materialize at spawn time. Secret-like env vars must use vault_redemption, not literal values.",
+      "$comment": "JSON Schema covers field shape. validateBrainRuntimeV1 is authoritative for duplicate env_var detection and agent_host.internal_auth_token_ref pairing. Keep the secret-like env_var pattern aligned with SECRET_ENV_VAR_RE in lib/brain/brain-runtime.js.",
+      "items": {
+        "type": "object",
+        "required": ["env_var", "source", "required"],
+        "additionalProperties": false,
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "env_var": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "redemption_recipient_brain_id": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean" },
+          "source": {
+            "type": "string",
+            "enum": ["vault_redemption", "literal"]
+          },
+          "ttl": {
+            "type": "string",
+            "pattern": "^(?!0+(?:ms|s|m|h|d)$)\\d+(ms|s|m|h|d)$"
+          },
+          "value": { "type": "string", "minLength": 1 },
+          "vault_path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\s/]+(?:/[^\\s/]+)+$"
+          },
+          "vault_secret_id": { "type": "string", "minLength": 1 }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "source": { "const": "vault_redemption" } },
+              "required": ["source"]
+            },
+            "then": {
+              "required": ["vault_path", "redemption_recipient_brain_id"],
+              "not": { "required": ["value"] }
+            }
+          },
+          {
+            "if": {
+              "properties": { "source": { "const": "literal" } },
+              "required": ["source"]
+            },
+            "then": {
+              "required": ["value"],
+              "not": {
+                "anyOf": [
+                  { "required": ["redemption_recipient_brain_id"] },
+                  { "required": ["ttl"] },
+                  { "required": ["vault_path"] },
+                  { "required": ["vault_secret_id"] }
+                ]
+              }
+            }
+          },
+          {
+            "$comment": "Secret-like env vars must not use source=literal. Keep pattern aligned with SECRET_ENV_VAR_RE in lib/brain/brain-runtime.js.",
+            "if": {
+              "properties": {
+                "env_var": {
+                  "pattern": "(^|_)(KEY|KEYS|TOKEN|TOKENS|SECRET|SECRETS|PASSWORD|PASSWORDS|CREDENTIAL|CREDENTIALS|PRIVATE|AUTH|JWT|SESSION|COOKIE|SIGNING|SALT|HASH|PEM|DSN|BEARER|PASSPHRASE|CERT|CERTIFICATE|APIKEY|ACCESSKEY|SECRETKEY|SSHKEY|CONNECTION_STRING)(_|$)|^(DATABASE|REDIS|MONGO|MONGODB|POSTGRES|POSTGRESQL|MYSQL|AMQP|KAFKA)_(URL|URI)$"
+                },
+                "source": { "const": "literal" }
+              },
+              "required": ["env_var", "source"]
+            },
+            "then": {
+              "not": {
+                "properties": { "source": { "const": "literal" } },
+                "required": ["source"]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "model_routing_defaults": {
+      "type": "object",
+      "description": "Symbolic model routing defaults resolved by mech-plane/mech-llms policy at spawn time.",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "task_model": { "type": "string", "minLength": 1 },
+        "chat_model": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "agentLocation": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["local", "http", "fly", "admp", "agent-host"]
+        },
+        "cwd": { "type": "string" },
+        "baseUrl": { "type": "string", "format": "uri" },
+        "host": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "httpRequestTimeoutMs": { "type": "integer", "minimum": 1000 },
+        "machineId": { "type": "string" },
+        "agentId": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "http" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["port"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "agent-host" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["baseUrl", "agentId"] }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["http", "fly", "admp", "agent-host"]
+              }
+            },
+            "required": ["type"]
+          },
+          "then": { "required": ["agentId"] }
+        }
+      ]
+    }
+  }
+}

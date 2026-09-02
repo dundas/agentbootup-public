@@ -1,0 +1,373 @@
+name: Hermes M0-H Qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  attestations: read
+
+concurrency:
+  group: hermes-m0h-qualification
+  cancel-in-progress: false
+
+jobs:
+  linux-amd64:
+    name: Linux amd64 evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up acquisition Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13.13'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: '1.3.3'
+
+      - name: Validate tracked M0-H evidence policy
+        run: bun run check:hermes-m0h-evidence -- --tracked "$GITHUB_WORKSPACE"
+
+      - name: Verify candidate runner identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          observed_kernel="$(uname -r)"
+          observed_machine="$(uname -m)"
+          printf 'ImageOS=%s\nImageVersion=%s\nRUNNER_OS=%s\nRUNNER_ARCH=%s\nkernel=%s\nmachine=%s\n' \
+            "${ImageOS:-}" "${ImageVersion:-}" "${RUNNER_OS:-}" "${RUNNER_ARCH:-}" \
+            "$observed_kernel" "$observed_machine"
+          test "${ImageOS:-}" = "ubuntu24"
+          case "${ImageVersion:-}" in
+            20260720.247.2|20260726.254.1) ;;
+            *) exit 1 ;;
+          esac
+          test "${RUNNER_OS:-}" = "Linux"
+          test "${RUNNER_ARCH:-}" = "X64"
+          test "$observed_machine" = "x86_64"
+          test "$observed_kernel" = "6.17.0-1020-azure"
+
+      - name: Create private qualification roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          qualification_root="$(mktemp -d "/var/tmp/hermes-m0h.XXXXXX")"
+          runner_workspace="$(realpath "$(dirname "$GITHUB_WORKSPACE")")"
+          test -d "$runner_workspace"
+          test "$runner_workspace" != "$GITHUB_WORKSPACE"
+          chmod 700 "$qualification_root"
+          for name in quarantine install home evidence full quiescence database source tools transfer; do
+            mkdir -m 700 "$qualification_root/$name"
+          done
+          {
+            echo "HERMES_M0H_ROOT=$qualification_root"
+            echo "HERMES_M0H_QUARANTINE=$qualification_root/quarantine"
+            echo "HERMES_M0H_INSTALL=$qualification_root/install"
+            echo "HERMES_M0H_HOME=$qualification_root/home"
+            echo "HERMES_M0H_EVIDENCE=$qualification_root/evidence"
+            echo "HERMES_M0H_FULL=$qualification_root/full"
+            echo "HERMES_M0H_QUIESCENCE=$qualification_root/quiescence"
+            echo "HERMES_M0H_DATABASE=$qualification_root/database"
+            echo "HERMES_M0H_SOURCE=$qualification_root/source"
+            echo "HERMES_M0H_TOOLS=$qualification_root/tools"
+            echo "HERMES_M0H_TRANSFER=$qualification_root/transfer"
+            echo "HERMES_M0H_UPLOAD=$qualification_root/upload"
+            echo "HERMES_M0H_RUNNER_WORKSPACE=$runner_workspace"
+          } >> "$GITHUB_ENV"
+
+      - name: Acquire and verify pinned inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          artifacts="$HERMES_M0H_QUARANTINE/artifacts"
+          wheelhouse="$artifacts/wheelhouse"
+          mkdir -m 700 "$artifacts" "$wheelhouse"
+
+          fetch() {
+            curl --fail --location --silent --show-error \
+              --proto '=https' --tlsv1.2 "$1" --output "$2"
+          }
+          verify() {
+            actual="$(sha256sum "$2" | cut -d ' ' -f 1)"
+            test "$actual" = "$1"
+          }
+
+          fetch \
+            "https://raw.githubusercontent.com/NousResearch/hermes-agent/3ef6bbd201263d354fd83ec55b3c306ded2eb72a/pyproject.toml" \
+            "$HERMES_M0H_SOURCE/pyproject.toml"
+          verify \
+            "7fc0552a6bfdd8d58632a9164e3432c868fc4d928170f8c8a545421134c5952f" \
+            "$HERMES_M0H_SOURCE/pyproject.toml"
+
+          fetch \
+            "https://raw.githubusercontent.com/NousResearch/hermes-agent/3ef6bbd201263d354fd83ec55b3c306ded2eb72a/uv.lock" \
+            "$HERMES_M0H_SOURCE/uv.lock"
+          verify \
+            "456f76d5396df0f543d1035c2d05173cae1882c290ba585cc926a79958b9d7fe" \
+            "$HERMES_M0H_SOURCE/uv.lock"
+
+          fetch \
+            "https://github.com/astral-sh/uv/releases/download/0.11.32/uv-x86_64-unknown-linux-gnu.tar.gz" \
+            "$artifacts/uv-x86_64-unknown-linux-gnu.tar.gz"
+          verify \
+            "aab924fd522efd06f1c5f3b93a243864fc453132c94b2dc49f1371b528a4b967" \
+            "$artifacts/uv-x86_64-unknown-linux-gnu.tar.gz"
+          gh attestation verify \
+            "$artifacts/uv-x86_64-unknown-linux-gnu.tar.gz" \
+            --repo astral-sh/uv
+          tar -xzf "$artifacts/uv-x86_64-unknown-linux-gnu.tar.gz" \
+            -C "$HERMES_M0H_TOOLS"
+          uv_bin="$HERMES_M0H_TOOLS/uv-x86_64-unknown-linux-gnu/uv"
+          test "$("$uv_bin" --version)" = "uv 0.11.32 (x86_64-unknown-linux-gnu)"
+
+          "$uv_bin" export \
+            --directory "$HERMES_M0H_SOURCE" \
+            --frozen \
+            --no-dev \
+            --no-emit-project \
+            --no-cache \
+            --no-header \
+            --output-file "$artifacts/requirements.txt"
+          verify \
+            "317e6f4a0dbf56999fafafcefe481dcd49cd64995d657592c08b3e7acaee0971" \
+            "$artifacts/requirements.txt"
+
+          test "$(python -c 'import platform; print(platform.python_version())')" = "3.13.13"
+          test "$(python -c 'import platform; print(platform.machine())')" = "x86_64"
+          python -m pip download \
+            --disable-pip-version-check \
+            --require-hashes \
+            --only-binary=:all: \
+            --dest "$wheelhouse" \
+            --requirement "$artifacts/requirements.txt"
+
+          fetch \
+            "https://github.com/actions/python-versions/releases/download/3.13.13-27225391538/python-3.13.13-linux-24.04-x64.tar.gz" \
+            "$artifacts/python-3.13.13-linux-24.04-x64.tar.gz"
+          verify \
+            "4254187c63019c6af254b3420596c1134376c2c1f99ad09dddde3cb8f67862db" \
+            "$artifacts/python-3.13.13-linux-24.04-x64.tar.gz"
+
+          fetch \
+            "https://files.pythonhosted.org/packages/e5/30/c85be8290e9565dc3c7a9720e93f3e59e09b1b163487be4946c3aa848f80/hermes_agent-0.19.0-py3-none-any.whl" \
+            "$artifacts/hermes_agent-0.19.0-py3-none-any.whl"
+          verify \
+            "bd0bac012aee38a60894781f4597dc29ee7bedb3448540249921f10d3bef327f" \
+            "$artifacts/hermes_agent-0.19.0-py3-none-any.whl"
+
+      - name: Create private evidence requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun_bin="$(command -v bun)"
+          env -i \
+            GITHUB_WORKSPACE="$GITHUB_WORKSPACE" \
+            HERMES_M0H_EVIDENCE="$HERMES_M0H_EVIDENCE" \
+            HERMES_M0H_FULL="$HERMES_M0H_FULL" \
+            HERMES_M0H_HOME="$HERMES_M0H_HOME" \
+            HERMES_M0H_INSTALL="$HERMES_M0H_INSTALL" \
+            HERMES_M0H_QUARANTINE="$HERMES_M0H_QUARANTINE" \
+            HERMES_M0H_QUIESCENCE="$HERMES_M0H_QUIESCENCE" \
+            HERMES_M0H_DATABASE="$HERMES_M0H_DATABASE" \
+            HERMES_M0H_RUNNER_WORKSPACE="$HERMES_M0H_RUNNER_WORKSPACE" \
+            HERMES_M0H_TRANSFER="$HERMES_M0H_TRANSFER" \
+            "$bun_bin" --eval '
+            import fs from "node:fs";
+            import path from "node:path";
+            import { HERMES_PROBE_PINS as pins } from "./scripts/runtime-adapters/hermes-m0h-probe.mjs";
+            const evidenceRoot = process.env.HERMES_M0H_EVIDENCE;
+            const installRoot = process.env.HERMES_M0H_INSTALL;
+            const hermesHome = process.env.HERMES_M0H_HOME;
+            const lane = "linux-x64";
+            const base = {
+              hermesHome,
+              installRoot,
+              repoRoot: process.env.GITHUB_WORKSPACE,
+              workspaceRoots: [process.env.HERMES_M0H_RUNNER_WORKSPACE],
+              evidenceRoot,
+              pythonExecutable: path.join(installRoot, "env/bin/python"),
+            };
+            const runtimeEvidence = {
+              phase: pins.phase,
+              hermesPackage: pins.hermesPackage,
+              hermesTag: pins.hermesTag,
+              hermesCommit: pins.hermesCommit,
+              hermesWheel: pins.hermesWheel,
+              hermesWheelSha256: pins.hermesWheelSha256,
+              dependencyLock: pins.dependencyLock,
+              dependencyLockSha256: pins.dependencyLockSha256,
+              pythonVersion: pins.pythonVersion,
+              lane,
+              pythonArtifact: pins.pythonArtifacts[lane].name,
+              pythonArtifactSha256: pins.pythonArtifacts[lane].sha256,
+            };
+            const write = (name, value) => {
+              const file = path.join(evidenceRoot, name);
+              fs.writeFileSync(file, JSON.stringify(value) + "\n", { mode: 0o600, flag: "wx" });
+            };
+            write("synthetic-request.json", {
+              hermesHome,
+              installRoot,
+              evidenceRoot,
+              outputPath: path.join(evidenceRoot, "synthetic-report.json"),
+              pythonExecutable: base.pythonExecutable,
+              uvExecutable: path.join(installRoot, "tools/uv"),
+              sitePackages: path.join(installRoot, "env/lib/python3.13/site-packages"),
+              closureManifest: path.join(installRoot, "artifacts/closure-manifest.json"),
+              lane,
+              repoRoot: base.repoRoot,
+              workspaceRoots: base.workspaceRoots,
+            });
+            write("profile-transfer-request.json", {
+              sourceHome: hermesHome,
+              workRoot: process.env.HERMES_M0H_TRANSFER,
+              hermesWheel: path.join(
+                process.env.HERMES_M0H_QUARANTINE,
+                "artifacts/hermes_agent-0.19.0-py3-none-any.whl",
+              ),
+              outputPath: path.join(process.env.HERMES_M0H_TRANSFER, "profile-transfer-report.json"),
+              executionClass: "github_actions_exact_lane",
+            });
+            write("full-backup-request.json", {
+              sourceHome: hermesHome,
+              workRoot: process.env.HERMES_M0H_FULL,
+              hermesWheel: path.join(
+                process.env.HERMES_M0H_QUARANTINE,
+                "artifacts/hermes_agent-0.19.0-py3-none-any.whl",
+              ),
+              outputPath: path.join(process.env.HERMES_M0H_FULL, "full-backup-report.json"),
+              executionClass: "github_actions_exact_lane",
+            });
+            write("quiescence-request.json", {
+              sourceHome: hermesHome,
+              workRoot: process.env.HERMES_M0H_QUIESCENCE,
+              hermesWheel: path.join(
+                process.env.HERMES_M0H_QUARANTINE,
+                "artifacts/hermes_agent-0.19.0-py3-none-any.whl",
+              ),
+              outputPath: path.join(
+                process.env.HERMES_M0H_QUIESCENCE,
+                "quiescence-report.json",
+              ),
+              executionClass: "github_actions_exact_lane",
+            });
+            write("database-request.json", {
+              installRoot,
+              sourceHome: hermesHome,
+              workRoot: process.env.HERMES_M0H_DATABASE,
+              hermesWheel: path.join(
+                process.env.HERMES_M0H_QUARANTINE,
+                "artifacts/hermes_agent-0.19.0-py3-none-any.whl",
+              ),
+              outputPath: path.join(
+                process.env.HERMES_M0H_DATABASE,
+                "database-report.json",
+              ),
+              executionClass: "github_actions_exact_lane",
+            });
+            for (const [requestName, probeName, outputName] of [
+              ["artifact-preflight-request.json", "artifact_preflight", "artifact-preflight-report.json"],
+              ["profile-list-request.json", "profile_list", "profile-list-report.json"],
+            ]) {
+              write(requestName, {
+                ...base,
+                outputPath: path.join(evidenceRoot, outputName),
+                evidence: runtimeEvidence,
+                probe: { name: probeName },
+              });
+            }
+          '
+
+      - name: Install and probe inside a no-egress namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_uid="$(id -u)"
+          runner_gid="$(id -g)"
+          runner_home="$HOME"
+          python_bin="$(command -v python)"
+          bun_bin="$(command -v bun)"
+          sudo env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin /usr/bin/unshare \
+            --net \
+            --setgid "$runner_gid" \
+            --setuid "$runner_uid" \
+            -- \
+            "$GITHUB_WORKSPACE/scripts/runtime-adapters/hermes-m0h-ci-offline.sh" \
+            "$GITHUB_WORKSPACE" \
+            "$HERMES_M0H_QUARANTINE" \
+            "$HERMES_M0H_INSTALL" \
+            "$HERMES_M0H_HOME" \
+            "$HERMES_M0H_EVIDENCE" \
+            "$HERMES_M0H_SOURCE/uv.lock" \
+            "$python_bin" \
+            "$bun_bin" \
+            "$runner_home" \
+            "$HERMES_M0H_RUNNER_WORKSPACE" \
+            "$HERMES_M0H_TRANSFER" \
+            "$HERMES_M0H_FULL" \
+            "$HERMES_M0H_QUIESCENCE" \
+            "$HERMES_M0H_DATABASE" \
+            "$ImageOS" \
+            "$ImageVersion" \
+            "$RUNNER_OS" \
+            "$RUNNER_ARCH"
+
+      - name: Project sanitized evidence transactionally
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          bun_bin="$(command -v bun)"
+          request="$HERMES_M0H_EVIDENCE/project-evidence-request.json"
+          test ! -e "$request"
+          test ! -e "$HERMES_M0H_UPLOAD"
+          REQUEST_PATH="$request" "$bun_bin" --eval '
+            import fs from "node:fs";
+            const request = {
+              artifactRoot: process.env.HERMES_M0H_UPLOAD,
+              databaseRoot: process.env.HERMES_M0H_DATABASE,
+              evidenceRoot: process.env.HERMES_M0H_EVIDENCE,
+              executionContext: {
+                imageOS: process.env.ImageOS,
+                imageVersion: process.env.ImageVersion,
+                kernel: fs.readFileSync("/proc/sys/kernel/osrelease", "utf8").trim(),
+                machine: process.arch === "x64" ? "x86_64" : process.arch,
+                runnerArch: process.env.RUNNER_ARCH,
+                runnerOS: process.env.RUNNER_OS,
+              },
+              fullRoot: process.env.HERMES_M0H_FULL,
+              installRoot: process.env.HERMES_M0H_INSTALL,
+              quiescenceRoot: process.env.HERMES_M0H_QUIESCENCE,
+              transferRoot: process.env.HERMES_M0H_TRANSFER,
+            };
+            fs.writeFileSync(process.env.REQUEST_PATH, JSON.stringify(request) + "\n", { mode: 0o600, flag: "wx" });
+          '
+          trap 'rm -f "$request"' EXIT
+          env -i \
+            "$bun_bin" "$GITHUB_WORKSPACE/scripts/runtime-adapters/hermes-m0h-project-evidence.mjs" \
+            --request "$request"
+
+      - name: Validate staged M0-H evidence policy
+        run: bun run check:hermes-m0h-evidence -- --artifact-root "$HERMES_M0H_UPLOAD"
+
+      - name: Upload qualification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: hermes-m0h-linux-amd64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.HERMES_M0H_UPLOAD }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7
+          compression-level: 9

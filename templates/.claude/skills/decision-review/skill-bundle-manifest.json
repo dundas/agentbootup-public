@@ -1,0 +1,31 @@
+{
+  "skill": "decision-review",
+  "bundle_version": "1.0.0",
+  "version_id": "decision-review@1.0.0+sha256_0a5ef7bc",
+  "bundle_hash": "sha256:0a5ef7bc845833ef906eee0a1a36f8851117a9fe6b278699e3a9696aa6d1f93a",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/decision-review.json",
+    "backup_root": ".ai/skills/backups/decision-review"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/decision-review/SKILL.md",
+      "target": ".claude/skills/decision-review/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

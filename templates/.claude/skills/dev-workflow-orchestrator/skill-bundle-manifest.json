@@ -1,0 +1,38 @@
+{
+  "skill": "dev-workflow-orchestrator",
+  "bundle_version": "1.0.0",
+  "version_id": "dev-workflow-orchestrator@1.0.0+sha256_2b675c05",
+  "bundle_hash": "sha256:2b675c059193fa7b0a1cbea03f466b6e29c61b1408562773e77f9a9807be3f10",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/dev-workflow-orchestrator.json",
+    "backup_root": ".ai/skills/backups/dev-workflow-orchestrator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/dev-workflow-orchestrator/SKILL.md",
+      "target": ".claude/skills/dev-workflow-orchestrator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/dev-workflow-orchestrator/reference.md",
+      "target": ".claude/skills/dev-workflow-orchestrator/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

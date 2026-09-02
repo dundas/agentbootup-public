@@ -24,16 +24,16 @@
 ## Usage
 ```bash
 # From this repo root
-node bootup.mjs --target /path/to/your/project
+node bootup.mjs seed --target /path/to/your/project
 
 # Preview only
-node bootup.mjs --target . --dry-run --verbose
+node bootup.mjs seed --target . --dry-run --verbose
 
 # Overwrite existing files if needed
-node bootup.mjs --target . --force
+node bootup.mjs seed --target . --force
 
 # Install a subset only
-node bootup.mjs --target . --subset agents,skills,gemini,codex
+node bootup.mjs seed --target . --subset agents,skills,gemini,codex
 ```
 
 ## After seeding
@@ -47,9 +47,25 @@ node bootup.mjs --target . --subset agents,skills,gemini,codex
 ```bash
 git clone <this-repo-url>
 cd <repo>
-node bootup.mjs --target /path/to/another/project
+node bootup.mjs seed --target /path/to/another/project
 ```
 
 ## Notes
 - Non-destructive by default (skips existing); use `--force` to overwrite
 - Idempotent and safe to re-run
+
+## Network mode (`agentbootup.json` at the repo root)
+
+When this directory is a **portfolio network** (see `agentbootup.json` with `role: "network"`), the CLI also supports **named environments** and composed installs (PRD-0017):
+
+- **Manifest path**: `environments/<name>.json` next to `agentbootup.json`.
+- **Schema (v1)**: `id` (must match `<name>`), `version` (integer ≥ 1), `projects` (array of `project.id` values from `agentbootup.json`), optional `install_order` (same ids as `projects`, each exactly once).
+- **Examples**:
+  - `agentbootup status --env decisive`
+  - `agentbootup doctor --env decisive`
+  - `agentbootup provision --env decisive` — provision every project in the manifest, in order
+  - `agentbootup provision --env decisive <project-id>` — provision one project; it must be listed in the manifest
+  - `agentbootup install --env decisive --dry-run` — print planned provisions without writing
+  - `agentbootup install --env decisive` — same sequencing as `provision --env` for all projects
+
+Unknown project ids in the manifest or ids not in the environment for `provision --env <id>` cause a clear error (no silent provision).

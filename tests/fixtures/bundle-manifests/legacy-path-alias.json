@@ -1,0 +1,11 @@
+{
+  "bundle_type": "skill_bundle",
+  "bundle_name": "legacy-paths",
+  "bundle_version": "0.1.0",
+  "version_id": "legacy-paths@0.1.0+sha256_cafe",
+  "bundle_hash": "sha256:cafe",
+  "files": [
+    { "path": ".claude/skills/legacy-paths/SKILL.md", "kind": "skill", "required": true },
+    { "path": "brain/scripts/legacy.ts", "kind": "runtime" }
+  ]
+}

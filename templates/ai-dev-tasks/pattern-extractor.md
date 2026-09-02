@@ -72,4 +72,4 @@ Analyze for:
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/pattern-extractor/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/pattern-extractor/SKILL.md`.*

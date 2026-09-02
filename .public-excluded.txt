@@ -1,2 +1,4 @@
 .github/workflows/claude-code-review.yml
 .github/workflows/claude.yml
+tests/runtime-adapters/fixtures/hermes/0.18.2-darwin-arm64-real/root/.env
+tests/runtime-adapters/fixtures/hermes/0.18.2-darwin-arm64-real/root/profiles/research/.env

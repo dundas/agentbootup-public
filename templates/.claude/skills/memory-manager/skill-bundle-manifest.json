@@ -1,0 +1,31 @@
+{
+  "skill": "memory-manager",
+  "bundle_version": "1.0.0",
+  "version_id": "memory-manager@1.0.0+sha256_bd7fa5e6",
+  "bundle_hash": "sha256:bd7fa5e6ba0968ae9f7148fd9ba881ff5cf984f48fc86be677c740a35f405a5b",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/memory-manager.json",
+    "backup_root": ".ai/skills/backups/memory-manager"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/memory-manager/SKILL.md",
+      "target": ".claude/skills/memory-manager/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

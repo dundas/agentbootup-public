@@ -1,0 +1,66 @@
+{
+  "skill": "transcript-query",
+  "bundle_version": "1.0.0",
+  "version_id": "transcript-query@1.0.0+sha256_557b08e9",
+  "bundle_hash": "sha256:557b08e98b43714b8906c9f4c5d94ef32b83d362594b0c8dd5b2249ca501b917",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/transcript-query.json",
+    "backup_root": ".ai/skills/backups/transcript-query"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/transcript-query/SKILL.md",
+      "target": ".claude/skills/transcript-query/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/transcript-query/lib/transcript-parser.js",
+      "target": ".claude/skills/transcript-query/lib/transcript-parser.js",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/transcript-query/reference.md",
+      "target": ".claude/skills/transcript-query/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/transcript-query/test-fuzzy-search.mjs",
+      "target": ".claude/skills/transcript-query/test-fuzzy-search.mjs",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/transcript-query/test-options.mjs",
+      "target": ".claude/skills/transcript-query/test-options.mjs",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/transcript-query/transcript-query.mjs",
+      "target": ".claude/skills/transcript-query/transcript-query.mjs",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

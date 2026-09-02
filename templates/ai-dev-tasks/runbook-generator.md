@@ -216,4 +216,4 @@ Create a comprehensive operational runbook that answers "what needs to be runnin
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/runbook-generator/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/runbook-generator/SKILL.md`.*
