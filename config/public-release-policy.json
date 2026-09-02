@@ -1,0 +1,83 @@
+{
+  "include_roots": [
+    ".github/workflows",
+    "ai-dev-tasks",
+    "docs",
+    "lib",
+    "packages",
+    "scripts",
+    "schemas",
+    "src",
+    "templates",
+    "tests"
+  ],
+  "include_files": [
+    ".npmrc",
+    "BOOTUP.md",
+    "CHANGELOG.md",
+    "DOCUMENT_MAP.md",
+    "LICENSE",
+    "README.md",
+    "RUNBOOK.md",
+    "TESTING.md",
+    "analyze-transcripts.mjs",
+    "bootup.mjs",
+    "bun.lock",
+    "memory-sync-daemon.mjs",
+    "memory-sync.mjs",
+    "package.json",
+    "bunfig.toml",
+    "config/circle-m0-transition-v1.json",
+    "config/hermes-m0h-closure-authority-v1.json",
+    "config/hermes-m0h-evidence-policy-v1.json",
+    "config/public-release-policy.json",
+    "config/runtime-adapter-support-matrix-v1.json",
+    "tasks/0052a-initial-support-matrix.md",
+    "tasks/0052a-native-command-probe-evidence.md",
+    "tasks/0052e-hermes-capture-strategy-decision.md",
+    "tasks/0052e-hermes-evidence-policy.md",
+    "tasks/0052e-hermes-m0h-database-safety.md",
+    "tasks/0052e-hermes-m0h-feasibility-spike.md",
+    "tasks/0052e-hermes-m0h-full-backup.md",
+    "tasks/0052e-hermes-m0h-linux-evidence.md",
+    "tasks/0052e-hermes-m0h-outcome.md",
+    "tasks/0052e-hermes-m0h-ownership-census.md",
+    "tasks/0052e-hermes-m0h-probe-harness.md",
+    "tasks/0052e-hermes-m0h-profile-transfer.md",
+    "tasks/0052e-hermes-m0h-quiescence.md",
+    "tasks/0052e-hermes-m0h-regression-coverage.md",
+    "tasks/0052e-hermes-m0h-synthetic-install.md",
+    "tasks/0052e-hermes-qualification-lanes.md",
+    "tasks/0052e-hermes-v019-pin-evidence.md",
+    "tasks/0052e-prd-hermes-runtime-adapter.md",
+    "tasks/tasks-0052e-prd-hermes-runtime-adapter.md"
+  ],
+  "exclude_roots": [
+    ".ai",
+    ".claude",
+    ".codex",
+    ".gemini",
+    "automation",
+    "brain",
+    "memory"
+  ],
+  "exclude_globs": [
+    "**/.DS_Store",
+    "**/*.log",
+    "**/secrets/**",
+    "**/.env",
+    "**/.env.*",
+    ".github/workflows/claude.yml",
+    ".github/workflows/claude-code-review.yml"
+  ],
+  "exclude_exceptions": [
+    "tests/runtime-adapters/fixtures/hermes/0.18.2-darwin-arm64-real/root/.env",
+    "tests/runtime-adapters/fixtures/hermes/0.18.2-darwin-arm64-real/root/profiles/research/.env"
+  ],
+  "required_files": [
+    "README.md",
+    "LICENSE",
+    "bootup.mjs",
+    "package.json"
+  ]
+}

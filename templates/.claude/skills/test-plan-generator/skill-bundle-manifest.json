@@ -1,0 +1,38 @@
+{
+  "skill": "test-plan-generator",
+  "bundle_version": "1.0.0",
+  "version_id": "test-plan-generator@1.0.0+sha256_a5dbbbd4",
+  "bundle_hash": "sha256:a5dbbbd43eb10ebf4a8d6edee165002036c2099f38054fd936440deaca18e946",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/test-plan-generator.json",
+    "backup_root": ".ai/skills/backups/test-plan-generator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/test-plan-generator/SKILL.md",
+      "target": ".claude/skills/test-plan-generator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/test-plan-generator/reference.md",
+      "target": ".claude/skills/test-plan-generator/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

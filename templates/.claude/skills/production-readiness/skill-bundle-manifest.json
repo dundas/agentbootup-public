@@ -1,0 +1,38 @@
+{
+  "skill": "production-readiness",
+  "bundle_version": "1.0.0",
+  "version_id": "production-readiness@1.0.0+sha256_fb0dc1ea",
+  "bundle_hash": "sha256:fb0dc1ea9fb240fe9576dd1c44f74a210a47f402ac45f06f4ad4f78fcd1dcd4d",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/production-readiness.json",
+    "backup_root": ".ai/skills/backups/production-readiness"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/production-readiness/SKILL.md",
+      "target": ".claude/skills/production-readiness/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/production-readiness/reference.md",
+      "target": ".claude/skills/production-readiness/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

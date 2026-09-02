@@ -1,0 +1,373 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agentbootup.dev/schemas/skill-bundle-manifest.schema.json",
+  "title": "Skill Bundle Manifest",
+  "description": "Contract for skill-bundle-manifest.json. PRD-0047 \u00a77. This file is the published, external-consumable contract (e.g. decisive's census); lib/bundle/manifest-schema.js enforces the same contract fail-closed at publish and install. Legacy aliases (`skill` -> `bundle_name`, file `path` -> `source`/`target`) are BLESSED-AND-DEPRECATED: accepted for backward compatibility, but publish emits a deprecation warning. `distribution.mode` and `projection.mode` are DIFFERENT namespaces and must never be validated against each other.",
+  "type": "object",
+  "required": [
+    "bundle_version",
+    "version_id",
+    "bundle_hash",
+    "files"
+  ],
+  "allOf": [
+    {
+      "description": "Identity: bundle_name is required, but the deprecated `skill` alias satisfies it.",
+      "anyOf": [
+        {
+          "required": [
+            "bundle_name"
+          ]
+        },
+        {
+          "required": [
+            "skill"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Type: bundle_type is required, but a manifest carrying the deprecated `skill` alias is a skill_bundle by implication (matches the installer).",
+      "anyOf": [
+        {
+          "required": [
+            "bundle_type"
+          ]
+        },
+        {
+          "required": [
+            "skill"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "The state kind and state_seed role are reserved for memory snapshots because non-memory hashing intentionally excludes state payloads.",
+      "if": {
+        "not": {
+          "properties": {
+            "bundle_type": {
+              "const": "memory_snapshot"
+            }
+          },
+          "required": [
+            "bundle_type"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "files": {
+            "items": {
+              "properties": {
+                "kind": {
+                  "not": {
+                    "const": "state"
+                  }
+                },
+                "role": {
+                  "not": {
+                    "const": "state_seed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "bundle_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical bundle identity. Required unless the deprecated `skill` alias is present."
+    },
+    "skill": {
+      "type": "string",
+      "minLength": 1,
+      "description": "DEPRECATED alias for `bundle_name`. Accepted for backward compatibility; publish warns."
+    },
+    "bundle_type": {
+      "type": "string",
+      "enum": [
+        "skill_bundle",
+        "protocol_bundle",
+        "memory_snapshot"
+      ]
+    },
+    "bundle_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-facing version (semver by convention). Content identity is `bundle_hash`, not this field. Publish refuses changed content (differing `bundle_hash`) under an unchanged `bundle_version`."
+    },
+    "version_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Fully-qualified `<bundle_name>@<bundle_version>+sha256_<short>` identity."
+    },
+    "bundle_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Content identity over the bundle payload. This \u2014 not the version string \u2014 is identity."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata. PRD-0047 \u00a77 refers to a human version as `metadata.version`; in the live format the human version field is top-level `bundle_version`. If `metadata.version` is present it must be a non-empty string. Requiring `metadata.version` fleet-wide is a migration decision owned by decisive and is intentionally NOT enforced here.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Runtime npm dependencies that bundle install resolves into the target repository. Values are npm version ranges; changing this object changes bundle content identity.",
+      "propertyNames": {
+        "pattern": "^(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "anyOf": [
+          {
+            "pattern": "^\\*$"
+          },
+          {
+            "pattern": "^(?:[~^]|<=?|>=?)?v?(?:0|[1-9]\\d*|[xX*])(?:\\.(?:0|[1-9]\\d*|[xX*])){0,2}(?:-(?:(?:0|[1-9]\\d*)|(?:[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))(?:\\.(?:(?:0|[1-9]\\d*)|(?:[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\|\\|(?:[~^]|<=?|>=?)?v?(?:0|[1-9]\\d*|[xX*])(?:\\.(?:0|[1-9]\\d*|[xX*])){0,2}(?:-(?:(?:0|[1-9]\\d*)|(?:[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))(?:\\.(?:(?:0|[1-9]\\d*)|(?:[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?)*$"
+          }
+        ]
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Upstream provenance: which repo and exact commit the bundle resolved from (PRD-0047 \u00a74).",
+      "additionalProperties": true
+    },
+    "distribution": {
+      "type": "object",
+      "description": "How the bundle is DELIVERED. Distinct namespace from `projection`.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "direct_sync",
+            "self_apply",
+            "snapshot"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "projection": {
+      "type": "object",
+      "description": "How the bundle is EMITTED into the target. Distinct namespace from `distribution`. `repo_materialization` is a projection mode and must never be accepted as a `distribution.mode`.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "repo_materialization"
+          ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "install": {
+      "type": "object",
+      "properties": {
+        "state_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backup_root": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "validation": {
+      "type": "object",
+      "description": "`validation.commands` run ONLY for repo-authored manifests, never for hosted/remote installs (PRD-0047 \u00a77 trust boundary).",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "mutations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "path"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "append_block_if_missing",
+              "json_set"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "key_path": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Required for json_set (matches the installer's normalizeMutation). Forbidden segments (__proto__/constructor/prototype) are additionally rejected by the code validator."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "json_set"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "required": [
+                "key_path"
+              ]
+            }
+          }
+        ],
+        "additionalProperties": true
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Published entry-level contract. The runtime validator additionally enforces cross-entry initializer constraints (a unique, required, bundled non-runtime-state script target) that JSON Schema draft-07 cannot express against sibling entries.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "DEPRECATED alias supplying both `source` and `target`. Accepted for backward compatibility; publish warns."
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "entrypoint",
+              "reference",
+              "manifest",
+              "wrapper",
+              "eval",
+              "canonical-protocol",
+              "portable_materialized",
+              "runtime",
+              "canonical-runtime",
+              "runtime-library",
+              "state_seed",
+              null,
+              "required_data",
+              "generated_state"
+            ],
+            "description": "Semantic file role. Values mirror the installer's known taxonomy; root-level validation reserves state_seed for memory snapshots."
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "initializer": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "description": "WO \u00a72: a repo-relative script that creates this file if absent at install. Only valid with role: required_data. Null when absent (normalized output)."
+          }
+        },
+        "anyOf": [
+          {
+            "description": "Canonical: explicit source and target.",
+            "required": [
+              "source",
+              "target"
+            ]
+          },
+          {
+            "description": "Deprecated: the `path` alias supplies both source and target.",
+            "required": [
+              "path"
+            ]
+          }
+        ],
+        "allOf": [
+          {
+            "description": "Initializers are only valid for required_data entries.",
+            "if": {
+              "properties": { "initializer": { "type": "string" } },
+              "required": ["initializer"]
+            },
+            "then": {
+              "properties": { "role": { "const": "required_data" } },
+              "required": ["role"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "role": { "const": "generated_state" } },
+              "required": ["role"]
+            },
+            "then": {
+              "properties": { "required": { "not": { "const": true } } }
+            }
+          },
+          {
+            "if": {
+              "properties": { "role": { "const": "required_data" } },
+              "required": ["role"]
+            },
+            "then": {
+              "properties": { "required": { "not": { "const": false } } }
+            }
+          }
+        ],
+        "additionalProperties": true
+      }
+    }
+  }
+}

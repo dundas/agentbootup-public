@@ -1,0 +1,9 @@
+{
+  "skill": "fetch-pr-review",
+  "bundle_version": "1.0.0",
+  "version_id": "fetch-pr-review@1.0.0+sha256_deadbeef",
+  "bundle_hash": "sha256:deadbeef",
+  "files": [
+    { "source": ".claude/skills/fetch-pr-review/SKILL.md", "target": ".claude/skills/fetch-pr-review/SKILL.md", "kind": "skill", "required": true, "role": "entrypoint" }
+  ]
+}

@@ -1,0 +1,67 @@
+# Reference brain image for the branch overlay standard.
+#
+# This template documents the intended layer ordering for branched brains:
+#   1. base-runtime
+#   2. protocols
+#   3. scripts
+#   4. skills
+#
+# Products own the final base image choice, deploy pipeline, and rolling restart
+# mechanics. This file is intentionally a reference contract, not a production-
+# specific Dockerfile for any one service.
+
+FROM oven/bun:1 AS base-runtime
+WORKDIR /opt/brain
+
+# Products should pin the real runtime dependencies in this bottom layer:
+# system packages, bun/node/python toolchain, shared binaries, etc.
+RUN mkdir -p /opt/brain/bin /opt/brain/protocols /opt/brain/scripts /opt/brain/skills
+
+FROM base-runtime AS protocols
+COPY .ai/protocols/ /opt/brain/protocols/
+
+FROM protocols AS scripts
+COPY scripts/ /opt/brain/scripts/
+
+FROM scripts AS skills
+# The published template surface ships runtime-specific skill projections.
+# Parameterize the source so the shared bundle can be built for the target
+# runtime without inheriting another runtime's projection by accident.
+# Omitting `--build-arg BRAIN_SKILLS_SRC=...` is intentionally fatal: the
+# sentinel path should fail the build instead of silently packaging the wrong
+# runtime tree. Current repos may point at `.claude/skills`; the contract is
+# intentionally broader so a future `.agents`-aligned projection can replace
+# that path without changing the image shape.
+# Example:
+#   --build-arg BRAIN_SKILLS_SRC=.claude/skills
+ARG BRAIN_SKILLS_SRC=__SET_BRAIN_SKILLS_SRC__
+COPY ${BRAIN_SKILLS_SRC}/ /opt/brain/skills/
+
+FROM skills AS runtime
+ENV BRAIN_SHARED=/opt/brain
+ENV BRAIN_DB_PATH=/brain/brain.db
+WORKDIR /brain
+
+# Runtime state is expected to live in the branch RW root mounted by the
+# product-owned environment:
+#   /brain/memory
+#   /brain/transcripts
+#   /brain/brain.db
+#   /brain/sessions
+#   /brain/state
+#   /brain/cache
+#   /brain/.env
+#   /brain/manifest.json
+# These paths are pre-created for image-only testing. A product-mounted RW
+# volume at `/brain` supersedes them at runtime.
+RUN mkdir -p /brain/memory /brain/transcripts /brain/sessions /brain/state /brain/cache
+
+# Products set the actual entrypoint and inject the full branch env contract:
+#   BRAIN_ID
+#   BRANCH_ID
+#   BRAIN_VOLUME
+#   BRAIN_SHARED
+#   BRAIN_BUNDLE_VERSION
+#   BRAIN_BASE_IMAGE_SHA
+#   BRAIN_DB_PATH
+#   VAULT_NAMESPACE

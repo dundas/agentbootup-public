@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "lane_status": "audit_only_blocked",
+  "circle_source": {
+    "repository": "dundas/circle_agent",
+    "approved_commit": "f1a3d79c47abf0b1d729299949618c089ba91031"
+  },
+  "observed_runtime": {
+    "bun_version": "1.3.3",
+    "agentbootup_version": "0.8.22",
+    "agentbootup_integrity_prefix": "sha512-uBu6"
+  },
+  "approved_transition": null,
+  "requirements": [
+    "A protected Circle-side workflow produces a sanitized runtime artifact without executing Agentbootup candidate code.",
+    "Owner and security reviewers approve the immutable Circle commit, Agentbootup version and full registry integrity, generator commit, and artifact digest.",
+    "The approved Agentbootup package contains lib/brain/restore-boot.js and the Circle lock exactly matches the approved version and integrity."
+  ]
+}

@@ -1,0 +1,1 @@
+{"eventId":"evt-1","sessionId":"existing-session","provider":"claude","timestamp":"2026-05-26T04:00:00.000Z","type":"message","role":"user","content":"already normalized","normalizationVersion":"mech-run.v1","provenance":{"ordinal":0}}

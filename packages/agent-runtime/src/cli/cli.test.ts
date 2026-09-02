@@ -28,6 +28,20 @@ function runCli(args: string, cwd?: string): { stdout: string; stderr: string; c
   }
 }
 
+async function waitForCliSuccess(args: string, options: { cwd?: string; timeoutMs?: number; intervalMs?: number } = {}) {
+  const timeoutMs = options.timeoutMs ?? 15000;
+  const intervalMs = options.intervalMs ?? 500;
+  const deadline = Date.now() + timeoutMs;
+  let lastResult = runCli(args, options.cwd);
+
+  while (lastResult.code !== 0 && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    lastResult = runCli(args, options.cwd);
+  }
+
+  return lastResult;
+}
+
 beforeAll(() => {
   // Create test directory and files
   mkdirSync(TEST_DIR, { recursive: true });
@@ -183,13 +197,9 @@ describe('CLI lifecycle', () => {
   });
 
   test('health checks agent status', async () => {
-    // Give the service a moment to start
-    await new Promise((r) => setTimeout(r, 2000));
-
-    const result = runCli(`health ${TEST_NAME}`);
-    // Health may succeed or report status — both are valid as long as command runs
+    const result = await waitForCliSuccess(`health ${TEST_NAME}`, { timeoutMs: 15000, intervalMs: 500 });
     expect(result.code).toBe(0);
-  });
+  }, 20000);
 
   test('stop command stops the agent', () => {
     const result = runCli(`stop ${TEST_NAME}`);

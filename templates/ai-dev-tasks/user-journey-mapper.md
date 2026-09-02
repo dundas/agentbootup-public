@@ -220,4 +220,4 @@ Create visual user journey maps that document how users flow through your applic
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/user-journey-mapper/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/user-journey-mapper/SKILL.md`.*

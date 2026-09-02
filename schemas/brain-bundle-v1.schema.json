@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/brain-bundle-v1.schema.json",
+  "$comment": "$id is a logical identifier only. Validators should not dereference it as a network URL.",
+  "title": "agentbootup Brain Bundle v1",
+  "description": "L1 portable brain manifest. Evolved additively from agentbootup.json v2 while remaining environment-agnostic. This schema is reference-only for credentials and does not prescribe secret storage.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "brainId"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "manifest_version": {
+      "const": 1,
+      "description": "Brain bundle schema major version."
+    },
+    "brainId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable brain identifier. Must remain stable across mount/unmount."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "format": {
+          "type": "string",
+          "examples": [
+            "agentbootup.json"
+          ]
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "agentId": {
+          "type": "string"
+        }
+      }
+    },
+    "credential_references": {
+      "type": "array",
+      "description": "References to credentials only. Raw secret values, private keys, API tokens, and passwords are forbidden by the agentbootup validator.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "key_id": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "toolsets": {
+      "type": "object",
+      "description": "Environment-scoped toolset capability contract. Keyed by environment id (e.g. circle_computer, mac-mini, macbook-pro-5); each value is a per-environment allowlist/disabled_toolsets policy. pi-package selection is NOT here \u2014 it is a mech-plane routing concern.",
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "allowlist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Toolsets allowed in this environment"
+          },
+          "disabled_toolsets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Toolsets explicitly disabled in this environment"
+          }
+        }
+      }
+    }
+  }
+}

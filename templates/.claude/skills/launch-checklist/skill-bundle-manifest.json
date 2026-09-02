@@ -1,0 +1,31 @@
+{
+  "skill": "launch-checklist",
+  "bundle_version": "1.0.0",
+  "version_id": "launch-checklist@1.0.0+sha256_abb97c9c",
+  "bundle_hash": "sha256:abb97c9ca26e95d155ba9f180c460e766c98e4bfbc39f0de5983fb5404c450e3",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/launch-checklist.json",
+    "backup_root": ".ai/skills/backups/launch-checklist"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/launch-checklist/SKILL.md",
+      "target": ".claude/skills/launch-checklist/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}
