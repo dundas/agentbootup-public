@@ -27,10 +27,24 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { createHash } from 'node:crypto';
 import { TranscriptParser } from './lib/analysis/transcript-parser.js';
 import { InsightExtractor } from './lib/analysis/insight-extractor.js';
 import { MemoryWriter } from './lib/analysis/memory-writer.js';
-import { MechLLMsClient } from './lib/analysis/mech-llms-client.js';
+
+const sessionRef = (sessionId) => `ref_${createHash('sha256').update(String(sessionId)).digest('hex').slice(0, 16)}`;
+const normalizeProcessedSessions = (state) => new Set(
+  state?.sessionRefSchema === 1 && Array.isArray(state.processedSessionRefs)
+    ? state.processedSessionRefs.filter((value) => typeof value === 'string' && /^ref_[a-f0-9]{16}$/.test(value))
+    : (Array.isArray(state?.processedSessions) ? state.processedSessions : []).filter((value) => typeof value === 'string').map(sessionRef)
+);
+const isCurrentState = (state) => state?.sessionRefSchema === 1 && Array.isArray(state.processedSessionRefs);
+const withSessionRefs = (state, refs) => {
+  const { processedSessions: _legacy, ...rest } = state || {};
+  return { ...rest, sessionRefSchema: 1, processedSessionRefs: Array.from(refs), lastSaved: Date.now() };
+};
+const stableErrorCode = (error) => typeof error?.code === 'string' && /^(analysis_|ANALYSIS_|E[A-Z0-9_]+$)/.test(error.code)
+  ? error.code : 'ANALYSIS_FAILED';
 
 // Parse CLI args
 const args = process.argv.slice(2);
@@ -65,6 +79,10 @@ for (let i = 0; i < args.length; i++) {
 if (flags.help) {
   console.log(`
 analyze-transcripts - Extract insights from coding sessions for self-improvement
+
+NOTE
+  Transcript analysis sends only a bounded, deterministic-redacted projection.
+  Unsafe input or model responses are blocked before network or memory writes.
 
 USAGE
   analyze-transcripts [options]
@@ -135,12 +153,11 @@ async function main() {
 
   // Initialize components
   const parser = new TranscriptParser();
-  const llmClient = new MechLLMsClient({
+  const extractor = new InsightExtractor({
     appId,
     apiKey,
-    ...(mechUrl && { mechUrl })
-  });
-  const extractor = new InsightExtractor(llmClient);
+    ...(mechUrl && { mechUrl }),
+  }, { projectRoots: [projectPath] });
   const writer = new MemoryWriter({ basePath });
 
   // Load state
@@ -154,7 +171,12 @@ async function main() {
     try {
       const stateContent = await fs.readFile(statePath, 'utf-8');
       const state = JSON.parse(stateContent);
-      processedSessions = new Set(state.processedSessions || []);
+      processedSessions = normalizeProcessedSessions(state);
+      if (!flags.dryRun && !isCurrentState(state)) {
+        const temporaryPath = `${statePath}.${process.pid}.tmp`;
+        await fs.writeFile(temporaryPath, JSON.stringify(withSessionRefs(state, processedSessions), null, 2), 'utf-8');
+        await fs.rename(temporaryPath, statePath);
+      }
       if (flags.verbose) {
         console.log(`Loaded state: ${processedSessions.size} previously analyzed sessions`);
       }
@@ -168,7 +190,7 @@ async function main() {
 
   if (transcripts.length === 0) {
     console.log('No transcripts found for this project.');
-    console.log(`Looked in: ~/.claude/projects/ for project path matching ${projectPath}`);
+    console.log('No accessible transcript records matched this project.');
     return;
   }
 
@@ -181,16 +203,12 @@ async function main() {
     // Specific session
     toAnalyze = transcripts.filter(t => t.sessionId.startsWith(flags.session));
     if (toAnalyze.length === 0) {
-      console.error(`Session not found: ${flags.session}`);
-      console.log('Available sessions:');
-      transcripts.slice(0, 10).forEach(t => {
-        console.log(`  ${t.sessionId.substring(0, 8)} - ${t.path}`);
-      });
+      console.error('Requested session was not found.');
       process.exit(1);
     }
   } else if (flags.all) {
     // All unprocessed
-    toAnalyze = transcripts.filter(t => !processedSessions.has(t.sessionId));
+    toAnalyze = transcripts.filter(t => !processedSessions.has(sessionRef(t.sessionId)));
   } else {
     // Recent (by hours)
     const hours = flags.hours || 24;
@@ -210,7 +228,7 @@ async function main() {
 
     toAnalyze = withStats
       .filter(t => t.mtime.getTime() > cutoff)
-      .filter(t => !processedSessions.has(t.sessionId))
+      .filter(t => !processedSessions.has(sessionRef(t.sessionId)))
       .sort((a, b) => a.mtime - b.mtime);
   }
 
@@ -232,7 +250,7 @@ async function main() {
 
   for (const transcript of toAnalyze) {
     const { sessionId, path: transcriptPath } = transcript;
-    const shortId = sessionId.substring(0, 8);
+    const shortId = sessionRef(sessionId);
 
     process.stdout.write(`Analyzing ${shortId}...`);
 
@@ -243,7 +261,7 @@ async function main() {
       // Check significance
       if (!extractor.isSignificant(data)) {
         console.log(` skipped (${data.summary.messageCount} msgs, not significant)`);
-        processedSessions.add(sessionId);
+        processedSessions.add(shortId);
         continue;
       }
 
@@ -253,7 +271,12 @@ async function main() {
       }
 
       // Extract insights via LLM
-      const insights = await extractor.extractInsights(data);
+      const insights = await extractor.extractInsights(data, { sessionId });
+      if (insights?.state === 'blocked_redaction' || insights?.state === 'blocked_response') {
+        errorCount++;
+        console.log(` ${insights.state} (${insights.code})`);
+        continue;
+      }
 
       const insightCount =
         insights.insights.technicalLearnings.length +
@@ -267,7 +290,7 @@ async function main() {
       const memoryPath = await writer.updateMemoryMd(insights);
 
       // Track
-      processedSessions.add(sessionId);
+      processedSessions.add(shortId);
       analyzed++;
       insightsTotal += insightCount;
       if (memoryPath) memoryUpdates++;
@@ -297,19 +320,15 @@ async function main() {
       }
     } catch (err) {
       errorCount++;
-      console.log(` ERROR: ${err.message}`);
-      if (err.code) console.log(`  Error code: ${err.code}`);
-      if (!flags.verbose) console.log(`  Use --verbose for full stack trace`);
-      if (flags.verbose) {
-        console.error(err);
-      }
+      console.log(` ERROR: ${stableErrorCode(err)}`);
     }
   }
 
   // Save state
   if (!flags.dryRun) {
     const state = {
-      processedSessions: Array.from(processedSessions),
+      sessionRefSchema: 1,
+      processedSessionRefs: Array.from(processedSessions),
       stats: {
         sessionsAnalyzed: analyzed,
         insightsExtracted: insightsTotal,
@@ -329,6 +348,7 @@ async function main() {
   console.log(`MEMORY.md updates: ${memoryUpdates}`);
   if (errorCount > 0) {
     console.log(`Errors: ${errorCount} session(s) failed`);
+    process.exitCode = 1;
   }
 
   if (!flags.dryRun && analyzed > 0) {
@@ -346,7 +366,7 @@ async function showStats(basePath) {
     const state = JSON.parse(content);
 
     console.log('--- Transcript Analysis Stats ---');
-    console.log(`Sessions analyzed:  ${state.processedSessions?.length || 0}`);
+  console.log(`Sessions analyzed:  ${state.processedSessionRefs?.length || state.processedSessions?.length || 0}`);
     console.log(`Insights extracted: ${state.stats?.insightsExtracted || 0}`);
     console.log(`MEMORY.md updates:  ${state.stats?.memoryUpdates || 0}`);
     console.log(`Last analysis:      ${state.stats?.lastAnalysisAt ? new Date(state.stats.lastAnalysisAt).toLocaleString() : 'never'}`);

@@ -146,4 +146,4 @@ Generate well-formed user stories with acceptance criteria for features, without
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/user-story-generator/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/user-story-generator/SKILL.md`.*
