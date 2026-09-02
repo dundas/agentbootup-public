@@ -1,0 +1,58 @@
+{
+  "fixture_version": 1,
+  "runtime_family": "hermes",
+  "runtime_version": "0.18.2",
+  "runtime_commit": "46e87b14fd6c943ef0d6671fb0d74c5dde5d4c6b",
+  "qualification_scope": "legacy_regression_only",
+  "platform": {"os": "darwin", "os_version": "14", "architecture": "arm64", "python": "3.11.15"},
+  "generated": true,
+  "sanitized": true,
+  "credential_policy": "empty_files_only",
+  "artifacts": {
+    "root/state.db": "sha256:3cb109f20a12f87cb290b1254720b000acfe160aa0686f6fc7a29bf52e4075d6",
+    "native/hermes-backup.zip": "sha256:043b1818c7ee767c5701820b38a9d629be8e5223ebe4b2002368079b31eefcd7"
+  },
+  "semantic_canaries": ["blue orchard", "fixture-skill-ok"],
+  "tree_integrity": {
+    "algorithm": "sha256",
+    "digest": "6196bc2bb57c933fdad457803816cf37b26e5e4b9d89111453ab3a9c778a6511",
+    "files": [
+      "root/.env",
+      "root/AGENTS.md",
+      "root/SOUL.md",
+      "root/auth.json",
+      "root/config.yaml",
+      "root/cron/jobs.json",
+      "root/memories/MEMORY.md",
+      "root/memories/USER.md",
+      "root/profiles/research/.env",
+      "root/profiles/research/.no-bundled-skills",
+      "root/profiles/research/SOUL.md",
+      "root/profiles/research/profile.yaml",
+      "root/sessions/fixture.jsonl",
+      "root/skills/fixture-skill/SKILL.md",
+      "root/state.db",
+      "root/state.db-shm",
+      "root/state.db-wal"
+    ]
+  },
+  "expected_classes": {
+    "portable_core": ["root/AGENTS.md", "root/SOUL.md", "root/memories", "root/skills"],
+    "runtime_state": ["root/state.db", "root/config.yaml", "root/sessions", "root/cron", "root/profiles/research/.no-bundled-skills", "root/profiles/research/SOUL.md", "root/profiles/research/profile.yaml"],
+    "secret": ["root/.env", "root/auth.json", "root/profiles/research/.env"],
+    "external_state": [],
+    "reproducible": [],
+    "machine_local": [],
+    "cache": ["root/state.db-wal", "root/state.db-shm"],
+    "manual_review": []
+  },
+  "native_archive_observations": {
+    "includes_cache_logs": true,
+    "includes_import_preserved_runtime_state": true,
+    "excludes_dependencies_checkpoints_and_pids": true
+  },
+  "native_archive_integrity": {
+    "members": 19,
+    "membership_sha256": "3f4492519c8897a4e8f60fec6f7b295270b4359a82380310627b9c39f0affc64"
+  }
+}

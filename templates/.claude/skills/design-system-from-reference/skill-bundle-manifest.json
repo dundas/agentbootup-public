@@ -1,0 +1,31 @@
+{
+  "skill": "design-system-from-reference",
+  "bundle_version": "1.0.0",
+  "version_id": "design-system-from-reference@1.0.0+sha256_f33ff4b6",
+  "bundle_hash": "sha256:f33ff4b62549abfd187c07fc0e8f180ed8c435373cf7a009c1b80a97571d4775",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/design-system-from-reference.json",
+    "backup_root": ".ai/skills/backups/design-system-from-reference"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/design-system-from-reference/SKILL.md",
+      "target": ".claude/skills/design-system-from-reference/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

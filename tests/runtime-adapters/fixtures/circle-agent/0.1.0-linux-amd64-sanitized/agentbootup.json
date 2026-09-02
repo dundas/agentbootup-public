@@ -1,0 +1,12 @@
+{
+  "version": "2.0",
+  "role": "project",
+  "agent_id": "circle-agent-fixture",
+  "type": "project_gm",
+  "reports_to": "fixture-parent",
+  "network": "~/fixture-network",
+  "capabilities": ["agent-runtime", "circle-os-integration"],
+  "groups": [],
+  "monitoring": {"revenue": false, "users": false, "errors": true, "performance": true},
+  "selfImprovement": {"enabled": true, "autoFix": false, "requireApproval": true}
+}

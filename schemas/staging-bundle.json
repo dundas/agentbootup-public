@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.1",
+  "runtime": {
+    "required": {
+      "bun": ">=1.3.0",
+      "node": ">=18.0.0"
+    }
+  },
+  "max_execution_ms": 600000,
+  "wake_policy": {
+    "enabled": true
+  },
+  "agent_host": {
+    "internal_auth_token_ref": "agent-host/staging/INGRESS_SHARED_KEY"
+  },
+  "env_var_refs": {
+    "MECH_API_KEY": {
+      "vault_ref": "agent-host/staging/MECH_API_KEY"
+    },
+    "MECH_LLMS_URL": {
+      "vault_ref": "mech/staging/MECH_LLMS_URL"
+    },
+    "AGENT_HOST_SHARED_KEY": {
+      "vault_ref": "agent-host/staging/INGRESS_SHARED_KEY"
+    },
+    "MECH_APPS_URL": {
+      "vault_ref": "mech/staging/MECH_APPS_URL"
+    }
+  },
+  "env_allowlist": [
+    {
+      "env_var": "AGENT_HOST_SHARED_KEY",
+      "source": "vault_redemption",
+      "required": true,
+      "vault_path": "agent-host/staging/INGRESS_SHARED_KEY",
+      "redemption_recipient_brain_id": "agent-host",
+      "ttl": "1h",
+      "description": "Inbound auth gate shared key; redeems agent-host/staging/INGRESS_SHARED_KEY and materializes it as AGENT_HOST_SHARED_KEY for x-agent-host-key validation."
+    },
+    {
+      "env_var": "MECH_API_KEY",
+      "source": "vault_redemption",
+      "required": true,
+      "vault_path": "agent-host/staging/MECH_API_KEY",
+      "redemption_recipient_brain_id": "agent-host",
+      "ttl": "1h",
+      "description": "Outbound auth to mech-llms and mech-storage."
+    },
+    {
+      "env_var": "MECH_APPS_URL",
+      "source": "literal",
+      "required": true,
+      "value": "https://apps.mechdna.net"
+    },
+    {
+      "env_var": "MECH_LLMS_URL",
+      "source": "literal",
+      "required": true,
+      "value": "https://llms.mechdna.net"
+    }
+  ],
+  "model_routing_defaults": {
+    "provider": "mech-llms",
+    "task_model": "default-task",
+    "chat_model": "default-chat"
+  }
+}

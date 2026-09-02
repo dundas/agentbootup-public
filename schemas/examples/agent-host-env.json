@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "environment": "agent-host",
+  "brains": [
+    "agent-host"
+  ],
+  "environment_skills": {
+    "path": "./environment-skills/agent-host",
+    "optional": true
+  },
+  "mount_base": "/srv/agent-host/workspaces/<id>",
+  "secret_source": {
+    "provider": "mech-vault",
+    "namespace": "agent-host-production"
+  },
+  "routing": {
+    "provider": "mech-plane",
+    "endpoint": "http://localhost:8080"
+  }
+}

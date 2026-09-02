@@ -1,0 +1,31 @@
+{
+  "skill": "api-integrator",
+  "bundle_version": "1.0.0",
+  "version_id": "api-integrator@1.0.0+sha256_7d346374",
+  "bundle_hash": "sha256:7d346374aa8a48b92bd6fb37e8e081b25ed6b8de3d0d3ec25eb927f2f694b6af",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/api-integrator.json",
+    "backup_root": ".ai/skills/backups/api-integrator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/api-integrator/SKILL.md",
+      "target": ".claude/skills/api-integrator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

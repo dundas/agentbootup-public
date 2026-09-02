@@ -1,0 +1,32 @@
+{
+  "skill": "fetch-pr-review",
+  "bundle_version": "1.0.0",
+  "version_id": "fetch-pr-review@1.0.0+sha256_deadbeef",
+  "bundle_hash": "sha256:deadbeef",
+  "files": [
+    {
+      "source": ".claude/skills/fetch-pr-review/SKILL.md",
+      "target": ".claude/skills/fetch-pr-review/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint",
+      "shared": false,
+      "shared_with": [],
+      "initializer": null
+    }
+  ],
+  "bundle_type": "skill_bundle",
+  "bundle_name": "fetch-pr-review",
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": "skills/state/fetch-pr-review.json",
+    "backup_root": "skills/fetch-pr-review"
+  },
+  "validation": {
+    "commands": []
+  },
+  "dependencies": {},
+  "mutations": []
+}

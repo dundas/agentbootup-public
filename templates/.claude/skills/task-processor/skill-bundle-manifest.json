@@ -1,0 +1,38 @@
+{
+  "skill": "task-processor",
+  "bundle_version": "1.0.0",
+  "version_id": "task-processor@1.0.0+sha256_297ea55f",
+  "bundle_hash": "sha256:297ea55f7dd0e72c3aed2449f4c0d471a90ca07d65fe1243c8a8996531e90060",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/task-processor.json",
+    "backup_root": ".ai/skills/backups/task-processor"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/task-processor/SKILL.md",
+      "target": ".claude/skills/task-processor/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/task-processor/reference.md",
+      "target": ".claude/skills/task-processor/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

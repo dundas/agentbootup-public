@@ -52,9 +52,9 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
-function exec(cmd: string, options?: { ignoreError?: boolean }): string {
+function exec(cmd: string, options?: { ignoreError?: boolean; timeoutMs?: number }): string {
   try {
-    return execSync(cmd, { encoding: 'utf-8', timeout: 15000 }).trim();
+    return execSync(cmd, { encoding: 'utf-8', timeout: options?.timeoutMs ?? 15000 }).trim();
   } catch (err: any) {
     if (options?.ignoreError) return err.stdout?.trim() ?? '';
     throw err;
@@ -190,12 +190,11 @@ export class LaunchdManager implements ProcessManager {
   }
 
   async uninstall(name: string): Promise<void> {
-    // Stop if running (ignore errors)
-    try {
-      await this.stop(name);
-    } catch {
-      // May not be running
-    }
+    const uid = getUid();
+    const label = getLabel(name);
+
+    // Best-effort stop (avoid blocking uninstall on slow launchctl operations)
+    exec(`launchctl bootout gui/${uid}/${label}`, { ignoreError: true, timeoutMs: 2000 });
 
     // Remove plist
     const plistPath = getPlistPath(name);
