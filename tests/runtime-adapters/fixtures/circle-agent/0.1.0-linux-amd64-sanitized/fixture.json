@@ -1,0 +1,44 @@
+{
+  "fixture_version": 1,
+  "runtime_family": "circle_agent",
+  "runtime_version": "0.1.0",
+  "source_commit": "41f4304bf8b17aec652816c58e38fcbbd1f7169b",
+  "agent_host": {
+    "version": "0.4.4",
+    "source_commit": "9f8926c423ac0187f1d073f0e7613665c55db0d1",
+    "image": "ghcr.io/dundas/agent-host@sha256:c08618349f29439c18b7c5905e64209469a162e67068a4a100aa3a42eaf02dac"
+  },
+  "platform": {"os": "linux", "os_version": null, "architecture": "amd64", "bun": null},
+  "missing_exact_pins": ["platform.os_version", "platform.bun"],
+  "generated": true,
+  "sanitized": true,
+  "m0_qualifying": false,
+  "database": {
+    "path": ".brain/brain.db",
+    "sha256": "b5d53f8bcdfc018b1979d4257b96b2e892ea48b39bb5bb3792bcc1bab5465902",
+    "schema_source": "templates/brain/brain-schema.sql",
+    "semantic_canary": "violet compass"
+  },
+  "tree_integrity": {
+    "algorithm": "sha256",
+    "digest": "3a849703a675cbaa12a19a1a8ce0d699aadd05695e046ceab71e2ee20eae1c47",
+    "files": [
+      ".brain/brain.db",
+      "agentbootup.json",
+      "brain/CLAUDE.md",
+      "brain/config.json",
+      "memory/MEMORY.md",
+      "package.json"
+    ]
+  },
+  "expected_classes": {
+    "portable_core": ["agentbootup.json", "brain/CLAUDE.md", "memory/MEMORY.md"],
+    "runtime_state": [".brain/brain.db"],
+    "secret": ["brain/config.json#/required_secrets"],
+    "external_state": [],
+    "reproducible": ["package.json", "fixture.json#/agent_host/image"],
+    "machine_local": [],
+    "cache": [],
+    "manual_review": []
+  }
+}

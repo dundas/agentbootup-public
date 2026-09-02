@@ -1,0 +1,38 @@
+{
+  "skill": "agentdrive",
+  "bundle_version": "1.0.0",
+  "version_id": "agentdrive@1.0.0+sha256_4a0d0774",
+  "bundle_hash": "sha256:4a0d0774767dc13b8a397752bcb5b58e81bce91a6c09c425d9825fe7882e0b50",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/agentdrive.json",
+    "backup_root": ".ai/skills/backups/agentdrive"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/agentdrive/SKILL.md",
+      "target": ".claude/skills/agentdrive/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/agentdrive/agentdrive.ts",
+      "target": ".claude/skills/agentdrive/agentdrive.ts",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "skill": "user-journey-mapper",
+  "bundle_version": "1.0.0",
+  "version_id": "user-journey-mapper@1.0.0+sha256_60534c52",
+  "bundle_hash": "sha256:60534c525575867f1bcc307ed6f83cf2334cf3d36f0cb9cf0e97c97c752a78c0",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/user-journey-mapper.json",
+    "backup_root": ".ai/skills/backups/user-journey-mapper"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/user-journey-mapper/SKILL.md",
+      "target": ".claude/skills/user-journey-mapper/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/user-journey-mapper/reference.md",
+      "target": ".claude/skills/user-journey-mapper/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

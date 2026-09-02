@@ -1,0 +1,31 @@
+{
+  "skill": "agent-teams",
+  "bundle_version": "1.0.0",
+  "version_id": "agent-teams@1.0.0+sha256_004516c7",
+  "bundle_hash": "sha256:004516c70acd636190f116eedc4fd589abef6961bf6b92581f32ff1d4a0630c1",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/agent-teams.json",
+    "backup_root": ".ai/skills/backups/agent-teams"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/agent-teams/SKILL.md",
+      "target": ".claude/skills/agent-teams/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

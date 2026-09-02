@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "agentbootup.mech-plane-runtime-successor-reconcile.v1",
+  "source": {
+    "docsCommit": "8e803126c9ba7fb3bda97e69b4ab5127048e0c02",
+    "featureCommit": "143036bc9a1712d125220f6b1462ffab3115a3ac",
+    "clean": true
+  },
+  "artifact": {
+    "identity": "@mech/run@0.4.6",
+    "integrity": "sha512-O3spSfiBHBJo7K3JDFuCEt/g5Cn0gtEwxTNNH7Rzzs+eV01Rg44gVFS71JIfKcfye3Wv4cN3i+lMoA1Llah8ng==",
+    "registryVerified": true
+  },
+  "reviewedPlaneEvidence": {
+    "matrix": "codex/local/plane-bound-live",
+    "bindingDigest": true,
+    "finiteExpiry": true,
+    "atomicDenyReplay": true,
+    "disconnectCancellation": true,
+    "planeRemoteLocalMode": false,
+    "serverRouteMounted": false
+  },
+  "independentRuntime": {
+    "executed": true,
+    "watchdogTerminationApplied": false,
+    "ok": false,
+    "classification": "real_probe_command_failed",
+    "phase": null,
+    "stderrSha256": "2f0168ecc8e8fbcafa067d88ae350bac94fd78d67e65ead26a5128e33f01c3da",
+    "stderrBytes": 142,
+    "exitCode": 1
+  },
+  "verdict": "NO_GO",
+  "blockers": [
+    "real_probe_command_failed"
+  ],
+  "scope": {
+    "agentbootupConnector": false,
+    "publicRoute": false,
+    "relayFrames": false,
+    "planeCodeChanged": false
+  }
+}

@@ -1,0 +1,1 @@
+{"sessionId":"gemini-session","startTime":"2026-05-26T03:00:00.000Z","messages":[{"type":"user","timestamp":"2026-05-26T03:01:00.000Z","content":"hello gemini"},{"type":"gemini","timestamp":"2026-05-26T03:02:00.000Z","content":[{"text":"hi from gemini"}]}]}

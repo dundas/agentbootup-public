@@ -1,0 +1,4 @@
+model:
+  provider: custom
+  base_url: http://127.0.0.1:65535/v1
+  default: fixture-model

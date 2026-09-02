@@ -1,0 +1,38 @@
+{
+  "skill": "tasklist-generator",
+  "bundle_version": "1.0.0",
+  "version_id": "tasklist-generator@1.0.0+sha256_ec8a89b5",
+  "bundle_hash": "sha256:ec8a89b5156cdce2d8540f3e668a032874099062d9c9fbfdc981ada586fe01b3",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/tasklist-generator.json",
+    "backup_root": ".ai/skills/backups/tasklist-generator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/tasklist-generator/SKILL.md",
+      "target": ".claude/skills/tasklist-generator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/tasklist-generator/reference.md",
+      "target": ".claude/skills/tasklist-generator/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

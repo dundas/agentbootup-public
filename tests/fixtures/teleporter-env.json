@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1",
+  "environment": "teleporter",
+  "brain_allowlist": ["tb", "tb.agent"],
+  "environment_skills": {
+    "path": "./envskills",
+    "optional": false
+  },
+  "secret_source": {
+    "provider": "mech-vault",
+    "namespace": "teleporter"
+  },
+  "routing_target": {
+    "provider": "mech-plane",
+    "endpoint": "https://mech-plane.example",
+    "approval_mode": "confidence"
+  },
+  "approval_flow": {
+    "mechanism": "teleporter_hook",
+    "parent_session_id_var": "TELEPORTATION_PARENT_SESSION_ID"
+  }
+}

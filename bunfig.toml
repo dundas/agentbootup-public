@@ -1,0 +1,3 @@
+[test]
+# Keep the suite out of the real ~/.agentbootup. See tests/setup/hermetic-machine-id.ts.
+preload = ["./tests/setup/hermetic-machine-id.ts"]

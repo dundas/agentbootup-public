@@ -8,7 +8,7 @@ Create a detailed, executable End-to-End Test Plan that an AI agent or developer
 ## Output
 
 - **Format:** Markdown (`.md`)
-- **Location:** `docs/testplans/`
+- **Location:** `/tasks/`
 - **Filename:** `testplan-[source].md`
   - From PRD: `testplan-0001-prd-user-auth.md`
   - From tasks: `testplan-tasks-0001-prd-user-auth.md`
@@ -178,10 +178,10 @@ Create a detailed, executable End-to-End Test Plan that an AI agent or developer
 ### Phase 3: Review & Save
 
 13. **Present draft to user for review**
-14. **Save to `docs/testplans/testplan-[source].md`**
+14. **Save to `/tasks/testplan-[source].md`**
 
 ---
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/test-plan-generator/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/test-plan-generator/SKILL.md`.*
