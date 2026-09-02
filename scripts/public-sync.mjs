@@ -50,7 +50,7 @@ Usage:
   process.exit(code);
 }
 
-function loadPolicy(policyPath) {
+export function loadPolicy(policyPath) {
   const raw = fs.readFileSync(policyPath, 'utf8');
   const policy = JSON.parse(raw);
 
@@ -59,6 +59,9 @@ function loadPolicy(policyPath) {
     if (!Array.isArray(policy[key])) {
       throw new Error(`Policy key "${key}" must be an array`);
     }
+  }
+  if (policy.exclude_exceptions !== undefined && !Array.isArray(policy.exclude_exceptions)) {
+    throw new Error('Policy key "exclude_exceptions" must be an array when present');
   }
   return policy;
 }
@@ -86,6 +89,7 @@ function globToRegex(glob) {
     .replaceAll('__GLOBSTAR__', '.*')
     .replaceAll('__STAR__', '[^/]*');
 
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp -- escapeRegex constrains policy globs to the fixed token grammar above.
   return new RegExp(`^${escaped}$`);
 }
 
@@ -93,10 +97,11 @@ function startsWithRoot(file, root) {
   return file === root || file.startsWith(`${root}/`);
 }
 
-function classifyFiles(files, policy) {
+export function classifyFiles(files, policy) {
   const includeRootSet = new Set(policy.include_roots);
   const includeFileSet = new Set(policy.include_files);
   const excludeRootSet = new Set(policy.exclude_roots);
+  const excludeExceptionSet = new Set(policy.exclude_exceptions || []);
   const excludeMatchers = policy.exclude_globs.map(globToRegex);
 
   const selected = [];
@@ -110,7 +115,7 @@ function classifyFiles(files, policy) {
     const excludedByRoot = [...excludeRootSet].some((root) => startsWithRoot(file, root));
     const excludedByGlob = excludeMatchers.some((re) => re.test(file));
 
-    if (excludedByRoot || excludedByGlob) {
+    if (excludedByRoot || (excludedByGlob && !excludeExceptionSet.has(file))) {
       excluded.push(file);
       continue;
     }
@@ -119,6 +124,17 @@ function classifyFiles(files, policy) {
   }
 
   return { selected, excluded };
+}
+
+export function validateExcludeExceptions(files, policy) {
+  const tracked = new Set(files);
+  for (const file of policy.exclude_exceptions || []) {
+    if (!tracked.has(file)) throw new Error(`Excluded-file exception is not tracked: ${file}`);
+    const body = fs.readFileSync(path.join(repoRoot, file), 'utf8');
+    if (/(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16}|:\/\/[^\s:@]+:[^\s@]+@/u.test(body)) {
+      throw new Error(`Excluded-file exception contains credential-shaped content: ${file}`);
+    }
+  }
 }
 
 function ensureRequiredFilesPresent(selected, policy) {
@@ -156,6 +172,7 @@ function writeManifest(files, target) {
 
 function runCheck(policy, verbose) {
   const files = gitTrackedFiles();
+  validateExcludeExceptions(files, policy);
   const { selected, excluded } = classifyFiles(files, policy);
   const missingRequired = ensureRequiredFilesPresent(selected, policy);
 
@@ -179,6 +196,7 @@ function runCheck(policy, verbose) {
 
 function runExport(policy, target, clean, verbose) {
   const files = gitTrackedFiles();
+  validateExcludeExceptions(files, policy);
   const { selected, excluded } = classifyFiles(files, policy);
   const missingRequired = ensureRequiredFilesPresent(selected, policy);
 
@@ -212,9 +230,11 @@ function main() {
   runExport(policy, args.target, args.clean, args.verbose);
 }
 
-try {
-  main();
-} catch (err) {
-  console.error(`public-sync failed: ${err.message}`);
-  process.exit(1);
+if (import.meta.main) {
+  try {
+    main();
+  } catch (err) {
+    console.error(`public-sync failed: ${err.message}`);
+    process.exit(1);
+  }
 }

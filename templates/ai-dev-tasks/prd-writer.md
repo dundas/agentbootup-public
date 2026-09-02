@@ -8,7 +8,7 @@ Create a detailed Product Requirements Document (PRD) in Markdown from an initia
 ## Output
 
 - Format: Markdown (.md)
-- Location: `docs/prds/`
+- Location: `/tasks/`
 - Filename pattern: `[n]-prd-[feature-name].md`
 
 ## Process
@@ -17,4 +17,4 @@ See SKILL.md
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/prd-writer/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/prd-writer/SKILL.md`.*

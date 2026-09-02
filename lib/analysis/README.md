@@ -94,19 +94,17 @@ Orchestrates the full analysis pipeline:
 
 ```javascript
 import { TranscriptAnalyzer } from './lib/analysis/transcript-analyzer.js';
-import { MechLLMsClient } from './lib/analysis/mech-llms-client.js';
-
-// Create LLM client
-const llmClient = new MechLLMsClient({
+// Supply configuration only; the privacy boundary owns the LLM client.
+const llmConfig = {
   appId: process.env.MECH_APP_ID,
   apiKey: process.env.MECH_API_KEY
-});
+};
 
 // Create analyzer
 const analyzer = new TranscriptAnalyzer({
   basePath: process.cwd(),        // Where memory/ dir lives
   projectPath: process.cwd(),     // Project to analyze
-  llmClient,
+  llmConfig,
   checkIntervalMs: 60 * 60 * 1000 // Check every hour
 });
 
@@ -144,7 +142,7 @@ node test-transcript-analyzer.mjs
 |--------|------|---------|-------------|
 | `basePath` | string | `process.cwd()` | Where memory/ directory lives |
 | `projectPath` | string | `basePath` | Project to analyze transcripts for |
-| `llmClient` | object | **required** | Mech LLMs API client |
+| `llmConfig` | object | **required** | `{ appId, apiKey, mechUrl? }`; used only by the verified privacy-boundary sender |
 | `checkIntervalMs` | number | `3600000` | How often to check for new sessions (ms) |
 
 ### MechLLMsClient Options
@@ -162,9 +160,9 @@ The `TranscriptAnalyzer` emits the following events:
 - `started` - Analyzer started
 - `stopped` - Analyzer stopped
 - `session:analyzed` - Session successfully analyzed
-  - `{ sessionId, insightsCount, dailyLogPath, memoryPath }`
+- `{ analysisId, insightsCount, dailyLogWritten, memoryUpdated }`
 - `session:error` - Error analyzing session
-  - `{ sessionId, error }`
+- `{ sessionRef, error }` (a non-reversible hash prefix)
 - `analysis:complete` - Batch analysis complete
   - `{ sessionsAnalyzed }`
 - `error` - General error
@@ -178,12 +176,11 @@ The `TranscriptAnalyzer` emits the following events:
 
 > Autonomous session analysis and learnings
 
-## Session c5fc2201 (14:30)
+## Analysis c5fc2201a1b2c3d4 (14:30)
 
 **Summary:** Built transcript query skill with fuzzy search
-**Duration:** 2h 15m
-**Location:** `/Users/kefentse/dev_env/decisive_redux`
-**Branch:** `feat/transcript-query`
+**CLI:** codex
+**Duration:** 8100000ms
 **Activity:** 120 messages, 8 files modified
 
 ### Technical Learnings
@@ -228,6 +225,10 @@ State is:
 - Saved on stop
 - Prevents duplicate analysis
 - Survives restarts
+
+Raw transcript contents, paths, branch names, tool results, and session IDs are
+never included in the LLM request or written to memory. A privacy-boundary block
+leaves a session unprocessed and produces a nonzero CLI exit status.
 
 ## Performance
 

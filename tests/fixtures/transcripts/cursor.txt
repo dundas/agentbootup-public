@@ -1,0 +1,4 @@
+user:
+<user_query>hello cursor</user_query>
+assistant:
+hi from cursor

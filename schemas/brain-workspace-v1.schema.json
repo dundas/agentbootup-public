@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/brain-workspace-v1.schema.json",
+  "$comment": "$id is a logical identifier only. This is the L2/L3 agent-host workspace materialization contract.",
+  "title": "agentbootup Brain Workspace v1",
+  "type": "object",
+  "required": ["schema_version", "repo", "ref", "volume_strategy", "mount_path"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+(\\.[0-9]+)?$"
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Repo URL or canonical clone source."
+    },
+    "ref": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{40}$",
+      "description": "Pinned full git commit SHA for workspace materialization."
+    },
+    "depth": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "auth": {
+      "type": "object",
+      "required": ["type", "vault_secret"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vault_secret": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "volume_strategy": {
+      "type": "string",
+      "enum": ["fly_volume_fork", "local_worktree"]
+    },
+    "worktree_include": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "env_allowlist": {
+      "type": "array",
+      "description": "Vault path suffixes allowed into the runtime environment. Omitted means deny-all.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "output_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "post_clone": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "mount_path": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

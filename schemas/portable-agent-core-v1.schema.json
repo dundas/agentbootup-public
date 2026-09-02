@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/portable-agent-core-v1.schema.json",
+  "$comment": "Logical identifier only. Runtime databases, live sessions, plaintext credentials, channel/device state, and process state are excluded by this closed top-level schema.",
+  "title": "AgentBootup Portable Agent Core v1 (draft)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "manifest_version", "contract_status", "identity", "instructions", "user_profile", "memory", "transcripts", "skills", "mcp_declarations", "model_preferences", "schedules", "credential_references", "provenance"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "manifest_version": { "const": 1 },
+    "contract_status": { "const": "draft" },
+    "identity": {
+      "type": "object", "additionalProperties": false, "required": ["agent_id"],
+      "properties": { "agent_id": { "type": "string", "minLength": 1 }, "display_name": { "type": "string", "minLength": 1 }, "description": { "type": "string" } }
+    },
+    "instructions": { "type": "array", "items": { "$ref": "#/$defs/contentItem" } },
+    "user_profile": { "$ref": "#/$defs/contentReference" },
+    "memory": { "type": "array", "items": { "$ref": "#/$defs/contentItem" } },
+    "transcripts": { "type": "array", "items": { "$ref": "#/$defs/contentItem" } },
+    "skills": { "type": "array", "items": { "$ref": "#/$defs/contentItem" } },
+    "mcp_declarations": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["name", "transport"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 }, "transport": { "enum": ["stdio", "http", "sse"] },
+          "command_ref": { "type": "string", "minLength": 1 }, "endpoint_ref": { "type": "string", "minLength": 1 },
+          "credential_references": { "type": "array", "items": { "$ref": "#/$defs/credentialReference" } }
+        }
+      }
+    },
+    "model_preferences": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "provider": { "type": "string", "minLength": 1 }, "task_model": { "type": "string", "minLength": 1 }, "chat_model": { "type": "string", "minLength": 1 } }
+    },
+    "schedules": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "expression", "enabled"],
+        "properties": { "id": { "type": "string", "minLength": 1 }, "expression": { "type": "string", "minLength": 1 }, "timezone": { "type": "string", "minLength": 1 }, "enabled": { "type": "boolean" }, "action_ref": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "credential_references": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false, "required": ["provider", "reference", "restore_status"],
+        "properties": {
+          "provider": { "type": "string", "minLength": 1 }, "reference": { "$ref": "#/$defs/credentialReference" },
+          "restore_status": { "enum": ["redeemed", "re_enroll_required", "skipped", "unsupported", "manual_review"] },
+          "remediation": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false, "required": ["source_runtime_family", "source_snapshot_id", "generated_by"],
+      "properties": { "source_runtime_family": { "type": "string", "minLength": 1 }, "source_snapshot_id": { "type": "string", "minLength": 1 }, "generated_by": { "type": "string", "minLength": 1 } }
+    },
+    "extensions": { "$ref": "#/$defs/extensions" }
+  },
+  "$defs": {
+    "credentialReference": { "type": "string", "pattern": "^(?!.*(?:sk|rk|ghp|github_pat)_[A-Za-z0-9_-]{12,})(?!.*sk-proj-[A-Za-z0-9_-]{20,})(?!.*sk-ant-api03-[A-Za-z0-9_-]{20,})[a-z][a-z0-9+.-]*://(?:[A-Za-z0-9._~-]+|\\[(?:(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?:[0-9A-Fa-f]{1,4}:){1,7}:|(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|(?:[0-9A-Fa-f]{1,4}:){1,5}(?::[0-9A-Fa-f]{1,4}){1,2}|(?:[0-9A-Fa-f]{1,4}:){1,4}(?::[0-9A-Fa-f]{1,4}){1,3}|(?:[0-9A-Fa-f]{1,4}:){1,3}(?::[0-9A-Fa-f]{1,4}){1,4}|(?:[0-9A-Fa-f]{1,4}:){1,2}(?::[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:(?:(?::[0-9A-Fa-f]{1,4}){1,6})|:(?:(?::[0-9A-Fa-f]{1,4}){1,7}|:))|(?:(?:[0-9A-Fa-f]{1,4}:){6}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|::(?:[0-9A-Fa-f]{1,4}:){5}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|(?:[0-9A-Fa-f]{1,4})?::(?:[0-9A-Fa-f]{1,4}:){4}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|(?:(?:[0-9A-Fa-f]{1,4}:){0,1}[0-9A-Fa-f]{1,4})?::(?:[0-9A-Fa-f]{1,4}:){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|(?:(?:[0-9A-Fa-f]{1,4}:){0,2}[0-9A-Fa-f]{1,4})?::(?:[0-9A-Fa-f]{1,4}:){2}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|(?:(?:[0-9A-Fa-f]{1,4}:){0,3}[0-9A-Fa-f]{1,4})?::[0-9A-Fa-f]{1,4}:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|(?:(?:[0-9A-Fa-f]{1,4}:){0,4}[0-9A-Fa-f]{1,4})?::(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}))\\])(?::[0-9]+)?(?:/(?:[A-Za-z0-9._~-]|%2[Ff])*)*(?:\\?(?:version|version_id|revision|rev)=[A-Za-z0-9._~-]+(?:&(?:version|version_id|revision|rev)=[A-Za-z0-9._~-]+)*)?(?:#[A-Za-z0-9._~-]+)?$" },
+    "checksum": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "digest"],
+      "properties": { "algorithm": { "enum": ["sha256", "hmac-sha256"] }, "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+    },
+    "contentReference": {
+      "type": "object", "additionalProperties": false, "required": ["content_ref", "checksum"],
+      "properties": { "content_ref": { "type": "string", "minLength": 1 }, "checksum": { "$ref": "#/$defs/checksum" }, "media_type": { "type": "string", "minLength": 1 } }
+    },
+    "contentItem": {
+      "type": "object", "additionalProperties": false, "required": ["id", "content_ref", "checksum"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "content_ref": { "type": "string", "minLength": 1 },
+        "checksum": { "$ref": "#/$defs/checksum" }, "media_type": { "type": "string", "minLength": 1 }
+      }
+    },
+    "extensions": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "migrated_fields": {
+          "type": "object", "additionalProperties": true,
+          "propertyNames": { "not": { "enum": ["runtime_databases", "live_sessions", "raw_credentials", "channel_state", "device_state", "process_state"] } }
+        },
+        "vendor": {
+          "type": "object", "additionalProperties": true,
+          "propertyNames": { "not": { "enum": ["runtime_databases", "live_sessions", "raw_credentials", "channel_state", "device_state", "process_state"] } }
+        }
+      }
+    }
+  }
+}

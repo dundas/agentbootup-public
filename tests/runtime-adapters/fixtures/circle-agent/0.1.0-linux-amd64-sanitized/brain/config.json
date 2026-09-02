@@ -1,0 +1,13 @@
+{
+  "serviceName": "Circle Agent Fixture",
+  "agentId": "circle-agent-fixture",
+  "type": "project_gm",
+  "role": "Recovery Fixture",
+  "reportsTo": "fixture-parent",
+  "capabilities": ["agent-runtime", "circle-os-integration"],
+  "groups": [],
+  "monitoring": {"revenue": false, "users": false, "errors": true, "performance": true},
+  "required_secrets": ["mech-api-key", "mech-app-id", "agentbeacon-api-key"],
+  "selfImprovement": {"enabled": true, "autoFix": false, "requireApproval": true},
+  "communication": {"hub": "https://example.invalid", "protocol": "admp"}
+}
