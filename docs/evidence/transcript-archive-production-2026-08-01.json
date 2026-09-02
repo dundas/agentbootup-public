@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-08-01T23:24:22.274Z",
+  "targetOrigin": "https://agentbootup.fly.dev",
+  "brainIdHash": "171cd9969103f91b",
+  "so27": "FAIL",
+  "verdict": "PAUSE",
+  "failureCode": "NOT_FOUND",
+  "checks": {
+    "capabilityEndpoint": false
+  },
+  "blockedReasons": [
+    "production_capability_evidence_unavailable"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "skill": "brain-db",
+  "bundle_version": "1.0.0",
+  "version_id": "brain-db@1.0.0+sha256_245cccb5",
+  "bundle_hash": "sha256:245cccb554d9a23a89c7715fe8533f5523e728919424a5a55d76094624649c4a",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/brain-db.json",
+    "backup_root": ".ai/skills/backups/brain-db"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/brain-db/SKILL.md",
+      "target": ".claude/skills/brain-db/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/brain-db/references/extension-patterns.md",
+      "target": ".claude/skills/brain-db/references/extension-patterns.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/brain-db/scripts/brain-db-guards.ts",
+      "target": ".claude/skills/brain-db/scripts/brain-db-guards.ts",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/brain-db/scripts/brain-db.ts",
+      "target": ".claude/skills/brain-db/scripts/brain-db.ts",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

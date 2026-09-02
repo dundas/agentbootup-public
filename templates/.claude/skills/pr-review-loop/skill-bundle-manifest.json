@@ -1,0 +1,38 @@
+{
+  "skill": "pr-review-loop",
+  "bundle_version": "1.0.0",
+  "version_id": "pr-review-loop@1.0.0+sha256_fe83acc4",
+  "bundle_hash": "sha256:fe83acc48d66eb65050c4b49c9f94b1a65ee89c08cb07d3006c2f5b03831419f",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/pr-review-loop.json",
+    "backup_root": ".ai/skills/backups/pr-review-loop"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/pr-review-loop/SKILL.md",
+      "target": ".claude/skills/pr-review-loop/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/pr-review-loop/reference.md",
+      "target": ".claude/skills/pr-review-loop/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

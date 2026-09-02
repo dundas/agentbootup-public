@@ -1,0 +1,60 @@
+name: Circle M0 transition audit (no qualification)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - config/circle-m0-transition-v1.json
+      - .github/workflows/circle-m0-qualification.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit-only:
+    name: Audit committed Circle transition evidence only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Agentbootup candidate without credentials
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Audit the committed allowlisted transition
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const policy = JSON.parse(fs.readFileSync('config/circle-m0-transition-v1.json', 'utf8'));
+          if (policy.schema_version !== 1 || !Array.isArray(policy.requirements) || policy.requirements.length < 1) throw new Error('Malformed Circle transition policy.');
+          if (policy.observed_runtime?.agentbootup_version !== '0.8.22') throw new Error('The audited old Circle pin must remain documented as Agentbootup 0.8.22.');
+          if (policy.lane_status === 'audit_only_blocked') {
+            if (policy.approved_transition !== null) throw new Error('Blocked lane cannot contain approved transition evidence.');
+            console.log('NOTICE: Circle transition is intentionally audit-only blocked; no M0 qualification ran.');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Circle M0 transition audit\n\n✅ Policy is valid and intentionally `audit_only_blocked`. No private source, candidate execution, artifact upload, or M0 qualification occurred.\n');
+            process.exit(0);
+          }
+          if (policy.lane_status !== 'transition_approved' || !policy.approved_transition) throw new Error('Circle transition lane status/evidence is malformed or inconsistent.');
+          const approved = policy.approved_transition;
+          for (const [name, value, pattern] of [
+            ['circle_commit', approved.circle_commit, /^[a-f0-9]{40}$/],
+            ['generator_commit', approved.generator_commit, /^[a-f0-9]{40}$/],
+            ['agentbootup_integrity', approved.agentbootup_integrity, /^sha512-[A-Za-z0-9+/]+={0,2}$/],
+            ['sanitized_artifact_sha256', approved.sanitized_artifact_sha256, /^[a-f0-9]{64}$/],
+            ['lock_sha256', approved.lock_sha256, /^[a-f0-9]{64}$/],
+          ]) if (!pattern.test(value ?? '')) throw new Error(`Invalid committed ${name}.`);
+          if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(approved.agentbootup_version ?? '') || approved.agentbootup_version === policy.observed_runtime.agentbootup_version) throw new Error('Approved dependency must be an exact reviewed version distinct from the audited old pin, not a caller-provided range.');
+          if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(approved.runtime_version ?? '') || approved.bun_version !== policy.observed_runtime.bun_version) throw new Error('Runtime/Bun transition pins are incomplete or inconsistent with observed policy.');
+          if (!approved.package_pins || approved.package_pins.agentbootup !== approved.agentbootup_version || !approved.toolset_pins) throw new Error('Exact package/toolset pins must be committed and bind Agentbootup version.');
+          if (approved.circle_commit !== policy.circle_source?.approved_commit) throw new Error('Approved Circle commit must match the audited source policy.');
+          if (approved.owner_review !== 'approved' || approved.security_review !== 'approved' || approved.producer_privacy_review !== 'approved') throw new Error('Owner, security, and producer privacy approval must be committed before this audit can pass.');
+          console.log('Committed transition evidence is structurally complete. This is not M0 qualification.');
+          NODE
+
+      - name: State the protected-boundary requirement
+        run: |
+          echo 'The private Circle repository must generate and privacy-review the sanitized artifact in its own protected environment.'
+          echo 'Candidate Agentbootup code must consume only the immutable sanitized artifact and must never receive the private checkout or token.'
+          echo 'A separate reviewed workflow is required before any artifact upload or M0 qualification claim.'
