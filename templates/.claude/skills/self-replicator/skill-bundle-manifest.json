@@ -1,0 +1,31 @@
+{
+  "skill": "self-replicator",
+  "bundle_version": "1.0.0",
+  "version_id": "self-replicator@1.0.0+sha256_84416a08",
+  "bundle_hash": "sha256:84416a085ac5a7bd8944974e3c994c0e159ba5b4d3ac67fe9aa675374dabecd0",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/self-replicator.json",
+    "backup_root": ".ai/skills/backups/self-replicator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/self-replicator/SKILL.md",
+      "target": ".claude/skills/self-replicator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

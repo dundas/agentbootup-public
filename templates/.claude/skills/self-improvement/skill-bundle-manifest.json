@@ -1,0 +1,31 @@
+{
+  "skill": "self-improvement",
+  "bundle_version": "1.0.0",
+  "version_id": "self-improvement@1.0.0+sha256_8be7ae78",
+  "bundle_hash": "sha256:8be7ae78b73e7dfecb9b164c031fad755f19624220a04203aed2c0eb1b797962",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/self-improvement.json",
+    "backup_root": ".ai/skills/backups/self-improvement"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/self-improvement/SKILL.md",
+      "target": ".claude/skills/self-improvement/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

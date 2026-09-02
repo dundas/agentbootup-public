@@ -1,0 +1,23 @@
+{
+  "version": "2.0",
+  "role": "network",
+  "hub": "https://agentdispatch.fly.dev",
+  "projects": [
+    {
+      "id": "agent-host",
+      "path": "./mech/agent-host",
+      "agent_id": "agent-host",
+      "type": "service",
+      "brain": true,
+      "trusted": true,
+      "capabilities": [
+        "agent-bootstrap",
+        "workspace-materialization",
+        "batch-secret-redemption",
+        "volume-fork",
+        "worktree-management",
+        "runtime-supervision"
+      ]
+    }
+  ]
+}

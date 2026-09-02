@@ -54,7 +54,7 @@ Run locally:
 
 Optionally validate the installer behavior:
 
-- `node bootup.mjs --dry-run --target /tmp/agentbootup-test --subset codex --verbose`
+- `node bootup.mjs seed --dry-run --target /tmp/agentbootup-test --subset codex --verbose`
 
 ## Recommended Next Actions
 

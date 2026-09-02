@@ -1,0 +1,38 @@
+{
+  "skill": "prd-writer",
+  "bundle_version": "1.0.0",
+  "version_id": "prd-writer@1.0.0+sha256_a8fc2c9a",
+  "bundle_hash": "sha256:a8fc2c9a7a4a754fbc73ad5972f82453efc1d5dcc2214f7c763cf5f8e29092b5",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/prd-writer.json",
+    "backup_root": ".ai/skills/backups/prd-writer"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/prd-writer/SKILL.md",
+      "target": ".claude/skills/prd-writer/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/prd-writer/reference.md",
+      "target": ".claude/skills/prd-writer/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

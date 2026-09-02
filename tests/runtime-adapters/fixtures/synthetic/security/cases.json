@@ -1,0 +1,25 @@
+{
+  "fixture_version": 1,
+  "cases": [
+    {"id": "relative-traversal", "kind": "file", "path": "../../escape", "expected": "manual_review"},
+    {"id": "posix-absolute", "kind": "file", "path": "/etc/passwd", "expected": "manual_review"},
+    {"id": "windows-drive-absolute", "kind": "file", "path": "C:\\Users\\fixture\\state.db", "expected": "manual_review"},
+    {"id": "windows-drive-relative", "kind": "file", "path": "C:state.db", "expected": "manual_review"},
+    {"id": "windows-unc", "kind": "file", "path": "\\\\server\\share\\state", "expected": "manual_review"},
+    {"id": "nul-byte", "kind": "file", "path": "memory/bad\u0000name", "expected": "manual_review"},
+    {"id": "external-symlink", "kind": "symlink", "path": "memory/link", "target": "../../outside", "expected": "manual_review"},
+    {"id": "declared-external-symlink", "kind": "symlink", "path": "memory/provider", "target": "<HOME>/.fixture-provider", "provider": "fixture", "expected": "external_state"},
+    {"id": "external-hardlink", "kind": "hardlink", "path": "state/linked.db", "target": "../../outside.db", "expected": "manual_review"},
+    {"id": "case-collision-a", "kind": "file", "path": "memory/Note.md", "collision_group": "case-a", "expected": "manual_review"},
+    {"id": "case-collision-b", "kind": "file", "path": "memory/note.md", "collision_group": "case-a", "expected": "manual_review"},
+    {"id": "fifo", "kind": "fifo", "path": "runtime/events", "expected": "manual_review"},
+    {"id": "socket", "kind": "socket", "path": "runtime/gateway.sock", "expected": "machine_local"},
+    {"id": "device", "kind": "device", "path": "runtime/device", "expected": "manual_review"},
+    {"id": "unknown-durable", "kind": "file", "path": "new-runtime/state-v2.bin", "expected": "manual_review"},
+    {"id": "secret-file", "kind": "file", "path": "auth.json", "expected": "secret"},
+    {"id": "dependency-tree", "kind": "directory", "path": "node_modules", "expected": "reproducible"},
+    {"id": "cache-tree", "kind": "directory", "path": ".cache", "expected": "cache"},
+    {"id": "pid-file", "kind": "file", "path": "gateway.pid", "expected": "machine_local"},
+    {"id": "pending-approval", "kind": "file", "path": "approvals/pending.json", "expected": "machine_local"}
+  ]
+}

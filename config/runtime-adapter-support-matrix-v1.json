@@ -1,0 +1,123 @@
+{
+  "matrix_version": 1,
+  "revision": "0052a-2026-07-29.1",
+  "contract_version": "1.0.0-draft",
+  "status": "evidence_only",
+  "windows": {
+    "status": "unsupported",
+    "reason": "No runtime lane has completed the executable Windows qualification baseline required by PRD-0052A section 5.7.",
+    "remediation": "Keep Windows unsupported until a blocking Windows baseline proves path, link, archive, exact runtime probe, and clean-target restore behavior."
+  },
+  "deferred_candidates": [
+    {
+      "id": "circle-agent-0.1.0-linux-amd64-candidate",
+      "runtime_family": "circle_agent",
+      "runtime_version": "0.1.0",
+      "platform": { "os": "linux", "architecture": "amd64", "runtime": "bun" },
+      "qualification": "candidate",
+      "provenance": {
+        "format": "circle_candidate_v1",
+        "source_commit": "41f4304bf8b17aec652816c58e38fcbbd1f7169b",
+        "agent_host_version": "0.4.4",
+        "agent_host_commit": "9f8926c423ac0187f1d073f0e7613665c55db0d1",
+        "image_digest": "sha256:c08618349f29439c18b7c5905e64209469a162e67068a4a100aa3a42eaf02dac"
+      },
+      "missing_exact_pins": ["platform.os_version", "platform.bun"],
+      "reason": "Observed Circle evidence did not retain the exact Linux distribution/version or Bun patch version.",
+      "remediation": "Regenerate the Circle fixture in a disposable lane and attest the exact Linux distribution/version and Bun patch before adding a selectable lane.",
+      "evidence": [{ "reference": "tasks/0052a-initial-support-matrix.md#circle", "sha256": "e4191eb669d8ddcbca9d1da2dcd3926207906e90fe5052015b4c5a5778943704" }]
+    }
+  ],
+  "lanes": [
+    {
+      "id": "hermes-0.19.0-darwin-15.7.7-arm64-planned",
+      "runtime_family": "hermes",
+      "runtime_version": "0.19.0",
+      "adapter": { "name": "hermes-draft", "version": "0.1.0-draft", "contract_version": "1.0.0-draft" },
+      "platform": { "os": "darwin", "os_version": "15.7.7", "architecture": "arm64", "runtime": "python", "runtime_version": "3.13.13" },
+      "qualification": "planned_unqualified",
+      "provenance": {
+        "format": "hermes_release_v1",
+        "source_tag": "v2026.7.20",
+        "source_commit": "3ef6bbd201263d354fd83ec55b3c306ded2eb72a",
+        "wheel_sha256": "bd0bac012aee38a60894781f4597dc29ee7bedb3448540249921f10d3bef327f",
+        "python_artifact_sha256": "e85f4e11afcb3495abf224154faac965ce4f0b91c12ebad6fb49e08e14598f8e",
+        "dependency_lock_sha256": "456f76d5396df0f543d1035c2d05173cae1882c290ba585cc926a79958b9d7fe",
+        "evidence_sha256": "ec916fc2c645b20013499abd9dd83b802f936e5f95dc162f0bba07cfae76cdc8"
+      },
+      "evidence": [
+        { "reference": "tasks/0052e-hermes-qualification-lanes.md", "sha256": "ec916fc2c645b20013499abd9dd83b802f936e5f95dc162f0bba07cfae76cdc8" },
+        { "reference": "tasks/0052e-hermes-v019-pin-evidence.md", "sha256": "79ba3059e12eac0629dc0ef6ecb97862150b5edf90b87de52b02ad6c1a2b8d5d" }
+      ],
+      "remediation": "Run exact executable macOS arm64 M0-H evidence, then implement the Hermes adapter and complete the encrypted M1 clean-machine restore drill before qualifying this lane.",
+      "capabilities": {
+        "detect": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "inventory": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "quiesce": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "snapshot": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "restore": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "verify": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "resume": { "available": false, "mechanism": "manual_action", "evidence": [] }
+      }
+    },
+    {
+      "id": "hermes-0.19.0-linux-24.04.4-amd64-probe",
+      "runtime_family": "hermes",
+      "runtime_version": "0.19.0",
+      "adapter": { "name": "hermes-draft", "version": "0.1.0-draft", "contract_version": "1.0.0-draft" },
+      "platform": { "os": "linux", "os_version": "24.04.4", "architecture": "amd64", "runtime": "python", "runtime_version": "3.13.13" },
+      "qualification": "probe_only",
+      "provenance": {
+        "format": "hermes_release_v1",
+        "source_tag": "v2026.7.20",
+        "source_commit": "3ef6bbd201263d354fd83ec55b3c306ded2eb72a",
+        "wheel_sha256": "bd0bac012aee38a60894781f4597dc29ee7bedb3448540249921f10d3bef327f",
+        "python_artifact_sha256": "4254187c63019c6af254b3420596c1134376c2c1f99ad09dddde3cb8f67862db",
+        "dependency_lock_sha256": "456f76d5396df0f543d1035c2d05173cae1882c290ba585cc926a79958b9d7fe",
+        "evidence_sha256": "e7b62d59e13ae87fec23f7686be8567facc5044722d0f8e3d5b28eadac445096"
+      },
+      "evidence": [
+        { "reference": "tasks/0052e-hermes-capture-strategy-decision.md", "sha256": "bcd4ad17b7967b7b31f8e769a6241a90114fdd027810bdb39c527b8819550b1c" },
+        { "reference": "tasks/0052e-hermes-m0h-database-safety.md", "sha256": "76e1d6fee2c21a603a5faac50e4422c8155a2c9fa29e43617f7f0224caba24cc" },
+        { "reference": "tasks/0052e-hermes-m0h-full-backup.md", "sha256": "86ad2b3d8a60aabf61025cfd4cd8539ce1555efc14d097d45528f0b5e5bd507d" },
+        { "reference": "tasks/0052e-hermes-m0h-linux-evidence.md", "sha256": "e7b62d59e13ae87fec23f7686be8567facc5044722d0f8e3d5b28eadac445096" },
+        { "reference": "tasks/0052e-hermes-m0h-outcome.md", "sha256": "5ea825567f6d90e453ec37f43a6ebe446605dbbc99a796c9c9377fdc8c21e4d7" },
+        { "reference": "tasks/0052e-hermes-m0h-ownership-census.md", "sha256": "82a735064c76ed9c62738e3637a450093211ba244d5bbb317c99e71fdf1faa71" },
+        { "reference": "tasks/0052e-hermes-m0h-profile-transfer.md", "sha256": "4de6f13cc6121814061773d6c87909c53a8148b8f2043a04976c0199bba77d66" },
+        { "reference": "tasks/0052e-hermes-m0h-quiescence.md", "sha256": "887fbf3f8894ce78c4f52fbd9374c3081d768726cde562c8c618bd1066080c73" },
+        { "reference": "tasks/0052e-hermes-qualification-lanes.md", "sha256": "ec916fc2c645b20013499abd9dd83b802f936e5f95dc162f0bba07cfae76cdc8" },
+        { "reference": "tasks/0052e-hermes-v019-pin-evidence.md", "sha256": "79ba3059e12eac0629dc0ef6ecb97862150b5edf90b87de52b02ad6c1a2b8d5d" }
+      ],
+      "remediation": "Freeze parent contracts, implement the selected Hermes capture and lifecycle adapter, complete encrypted local restore rehearsal, then qualify both required lanes before claiming support.",
+      "capabilities": {
+        "detect": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "inventory": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "quiesce": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "snapshot": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "restore": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "verify": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "resume": { "available": false, "mechanism": "manual_action", "evidence": [] }
+      }
+    },
+    {
+      "id": "openclaw-2026.6.6-darwin-14-arm64-probe",
+      "runtime_family": "openclaw",
+      "runtime_version": "2026.6.6",
+      "adapter": { "name": "openclaw-draft", "version": "0.1.0-draft", "contract_version": "1.0.0-draft" },
+      "platform": { "os": "darwin", "os_version": "14", "architecture": "arm64", "runtime": "node", "runtime_version": "22.23.1" },
+      "qualification": "probe_only",
+      "provenance": { "format": "npm_package_v1", "source_commit": "8c802aa683510c7f7503597b54c3021733245e59", "package_integrity": "sha512-oMYoQ8a7zummw1tD+AX98yYLzqoq0tQmYWHG65AA0ZivgzmOb2oD0cVdhcWP9IT3opkHdJ5vBdWywUe6xWQXtw==", "evidence_sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" },
+      "evidence": [{ "reference": "tasks/0052a-native-command-probe-evidence.md#openclaw-backup-and-verify", "sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" }],
+      "remediation": "Implement the OpenClaw adapter and complete the Track 6 qualification drill before claiming production support.",
+      "capabilities": {
+        "detect": { "available": true, "mechanism": "native_command", "evidence": [{ "reference": "tasks/0052a-native-command-probe-evidence.md#newly-validated-current-capability", "sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" }] },
+        "inventory": { "available": true, "mechanism": "safe_filesystem", "evidence": [{ "reference": "tasks/0052a-native-command-probe-evidence.md#openclaw-backup-and-verify", "sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" }] },
+        "quiesce": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "snapshot": { "available": true, "mechanism": "native_command", "evidence": [{ "reference": "tasks/0052a-native-command-probe-evidence.md#openclaw-backup-and-verify", "sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" }] },
+        "restore": { "available": false, "mechanism": "manual_action", "evidence": [] },
+        "verify": { "available": true, "mechanism": "native_command", "evidence": [{ "reference": "tasks/0052a-native-command-probe-evidence.md#openclaw-backup-and-verify", "sha256": "90bc34b45cb1d2c041d9b5657ab26a83e8df9d7e733d0f6998d85e00a31de361" }] },
+        "resume": { "available": false, "mechanism": "manual_action", "evidence": [] }
+      }
+    }
+  ]
+}

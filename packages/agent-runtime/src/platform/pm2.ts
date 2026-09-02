@@ -8,7 +8,7 @@
  * (Windows, WSL, and any unrecognized platform).
  */
 
-import { execSync, spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { dirname, join, resolve } from 'path';
@@ -32,23 +32,43 @@ function getProcessName(name: string): string {
   return `${NAMESPACE}-${name}`;
 }
 
+let pm2Availability: boolean | null = null;
+
+function isPm2Available(): boolean {
+  if (pm2Availability != null) return pm2Availability;
+  try {
+    const proc = spawnSync('pm2', ['--version'], {
+      encoding: 'utf-8',
+      timeout: 1000,
+      env: { ...process.env, PM2_HOME },
+    });
+    pm2Availability = !proc.error && (proc.status ?? 1) === 0;
+  } catch {
+    pm2Availability = false;
+  }
+  return pm2Availability;
+}
+
 /**
  * Execute a pm2 command with isolated PM2_HOME.
- * All pm2 operations use our own pm2 daemon instance.
  */
-function pm2Exec(cmd: string, options?: { ignoreError?: boolean }): string {
+function pm2Exec(args: string[], options?: { ignoreError?: boolean }): string {
   mkdirSync(PM2_HOME, { recursive: true });
   const env = { ...process.env, PM2_HOME };
-  try {
-    return execSync(cmd, {
-      encoding: 'utf-8',
-      timeout: 30000,
-      env,
-    }).trim();
-  } catch (err: any) {
-    if (options?.ignoreError) return err.stdout?.trim() ?? '';
-    throw err;
+
+  if (!isPm2Available()) {
+    if (options?.ignoreError) return '';
+    throw new Error('pm2 is not installed');
   }
+
+  const proc = spawnSync('pm2', args, { encoding: 'utf-8', timeout: 30000, env });
+  if (proc.error || (proc.status ?? 1) !== 0) {
+    if (options?.ignoreError) return (proc.stdout || '').trim();
+    const msg = (proc.stderr || proc.stdout || '').trim();
+    throw new Error(msg || `pm2 ${args.join(' ')} failed`);
+  }
+
+  return (proc.stdout || '').trim();
 }
 
 // ─── PM2Manager ──────────────────────────────────────────────
@@ -78,7 +98,7 @@ export class PM2Manager implements ProcessManager {
     const processName = getProcessName(name);
 
     // Stop and delete from pm2
-    pm2Exec(`npx pm2 delete ${processName}`, { ignoreError: true });
+    pm2Exec(['delete', processName], { ignoreError: true });
 
     // Remove saved config
     const configPath = join(PM2_HOME, 'configs', `${processName}.json`);
@@ -97,7 +117,7 @@ export class PM2Manager implements ProcessManager {
     }
 
     // Start using saved config
-    pm2Exec(`npx pm2 start "${configPath}"`);
+    pm2Exec(['start', configPath]);
 
     // Get PID
     const pid = this.getPid(processName);
@@ -107,19 +127,19 @@ export class PM2Manager implements ProcessManager {
 
   async stop(name: string): Promise<void> {
     const processName = getProcessName(name);
-    pm2Exec(`npx pm2 stop ${processName}`);
+    pm2Exec(['stop', processName]);
   }
 
   async restart(name: string): Promise<void> {
     const processName = getProcessName(name);
-    pm2Exec(`npx pm2 restart ${processName}`);
+    pm2Exec(['restart', processName]);
   }
 
   async status(name: string): Promise<AgentStatusInfo> {
     const processName = getProcessName(name);
 
     try {
-      const output = pm2Exec(`npx pm2 jlist`, { ignoreError: true });
+      const output = pm2Exec(['jlist'], { ignoreError: true });
       if (!output) return { name, state: 'unknown', platform: 'pm2' };
 
       const processes = JSON.parse(output) as any[];
@@ -164,7 +184,7 @@ export class PM2Manager implements ProcessManager {
 
   async fleet(): Promise<AgentStatusInfo[]> {
     try {
-      const output = pm2Exec(`npx pm2 jlist`, { ignoreError: true });
+      const output = pm2Exec(['jlist'], { ignoreError: true });
       if (!output) return [];
 
       const processes = JSON.parse(output) as any[];
@@ -212,7 +232,7 @@ export class PM2Manager implements ProcessManager {
     const processName = getProcessName(name);
     const lines = opts?.lines ?? 50;
 
-    const args = ['npx', 'pm2', 'logs', processName, '--lines', String(lines)];
+    const args = ['pm2', 'logs', processName, '--lines', String(lines)];
     if (!opts?.follow) args.push('--nostream');
 
     const child = spawn(args[0], args.slice(1), {
@@ -267,7 +287,7 @@ export class PM2Manager implements ProcessManager {
 
   private getPid(processName: string): number {
     try {
-      const output = pm2Exec(`npx pm2 jlist`, { ignoreError: true });
+      const output = pm2Exec(['jlist'], { ignoreError: true });
       if (!output) return -1;
 
       const processes = JSON.parse(output) as any[];

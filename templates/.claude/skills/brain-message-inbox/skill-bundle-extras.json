@@ -1,0 +1,15 @@
+{
+  "validation": {
+    "commands": [
+      "env -u ADMP_AGENT_ID -u ADMP_API_KEY -u ADMP_SECRET_KEY bun brain/scripts/brain-message-inbox.ts --read-only  # must exit 10 (credentials missing; PATH preserved so bun resolves)",
+      "bun brain/scripts/brain-message-inbox.ts --help  # must exit 0"
+    ]
+  },
+  "mutations": [
+    {
+      "type": "append_block_if_missing",
+      "path": ".gitignore",
+      "content": ".brain/inbox/\n"
+    }
+  ]
+}

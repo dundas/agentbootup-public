@@ -6,13 +6,32 @@
  */
 
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import path from 'path';
 import os from 'os';
 
 export class TranscriptParser {
   constructor() {
-    this.projectsDir = path.join(os.homedir(), '.claude', 'projects');
+    // Auto-detect all installed CLI transcript directories.
+    // This makes the skill runnable in Claude Code, Gemini, Cursor, and Codex
+    // projects without modification after seeding.
+    this.projectsDirs = this._detectProjectsDirs();
+    this.projectsDir = this.projectsDirs[0]; // primary (backward compat)
     this.cache = new Map(); // Cache parsed transcripts by path
+  }
+
+  /**
+   * Detect all available CLI transcript project directories.
+   * Searches ~/.claude, ~/.gemini, ~/.cursor, ~/.codex in that order.
+   * Falls back to ~/.claude if none are found.
+   */
+  _detectProjectsDirs() {
+    const home = os.homedir();
+    const clis = ['claude', 'gemini', 'cursor', 'codex'];
+    const found = clis
+      .map(cli => path.join(home, `.${cli}`, 'projects'))
+      .filter(d => existsSync(d));
+    return found.length > 0 ? found : [path.join(home, '.claude', 'projects')];
   }
 
   /**
@@ -369,31 +388,34 @@ export class TranscriptParser {
   }
 
   /**
-   * List all transcripts for a project
+   * List all transcripts for a project across all detected CLI directories.
+   * Searches ~/.claude, ~/.gemini, ~/.cursor, ~/.codex (whichever exist).
    */
   async listTranscripts(projectPath) {
-    // Normalize project path to match .claude/projects directory structure
+    // Normalize project path to match CLI projects directory structure
     // /Users/foo/project -> -Users-foo-project
     const normalizedPath = projectPath.replace(/\//g, '-');
-    const projectDir = path.join(this.projectsDir, normalizedPath);
+    const results = [];
 
-    try {
-      const files = await fs.readdir(projectDir);
-      const transcripts = files
-        .filter(f => f.endsWith('.jsonl'))
-        .map(f => ({
-          path: path.join(projectDir, f),
-          sessionId: f.replace('.jsonl', ''),
-          name: f
-        }));
-
-      return transcripts;
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        return [];
+    for (const projectsDir of this.projectsDirs) {
+      const projectDir = path.join(projectsDir, normalizedPath);
+      try {
+        const files = await fs.readdir(projectDir);
+        const transcripts = files
+          .filter(f => f.endsWith('.jsonl'))
+          .map(f => ({
+            path: path.join(projectDir, f),
+            sessionId: f.replace('.jsonl', ''),
+            name: f
+          }));
+        results.push(...transcripts);
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err;
+        // Directory doesn't exist for this CLI — skip silently
       }
-      throw err;
     }
+
+    return results;
   }
 
   /**

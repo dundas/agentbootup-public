@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/runtime-backup-manifest-v1.schema.json",
+  "$comment": "Logical identifier only; validators must not dereference it. This JSON Schema is structural only and cannot enforce cross-item relations such as unique (logical_root, relative_path), unique (logical_root, logical_store_id), or hardlink_to target existence and compatibility. Acceptance and apply paths MUST also run acceptRuntimeBackupManifestV1 from lib/runtime-adapters/manifest.js. Draft until PRD-0052 Circle M0 freezes the contract.",
+  "title": "AgentBootup Runtime Backup Manifest v1 (draft)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "manifest_version", "contract_status", "qualification_status", "runtime_identity", "adapter_identity", "support", "consistency", "logical_roots", "inventory", "exclusions", "native_artifacts", "dependency_pins", "integrity", "encryption", "accounting"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "manifest_version": { "const": 1 },
+    "contract_status": { "const": "draft" },
+    "qualification_status": { "enum": ["unqualified", "manual_review"] },
+    "runtime_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["family", "version", "source_platform", "profiles", "agents", "workspaces", "detection_evidence"],
+      "properties": {
+        "family": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "source_platform": { "$ref": "#/$defs/platform" },
+        "profiles": { "$ref": "#/$defs/stringArray" },
+        "agents": { "$ref": "#/$defs/stringArray" },
+        "workspaces": { "$ref": "#/$defs/stringArray" },
+        "detection_evidence": { "$ref": "#/$defs/evidenceStringArray" }
+      }
+    },
+    "adapter_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version", "contract_version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "contract_version": { "const": "1.0.0-draft" }
+      }
+    },
+    "support": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "matrix_revision", "evidence"],
+      "properties": {
+        "status": { "enum": ["draft", "unsupported", "manual_review"] },
+        "matrix_revision": { "type": "string", "minLength": 1 },
+        "evidence": { "$ref": "#/$defs/evidenceStringArray" },
+        "remediation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "consistency": {
+      "type": "object", "additionalProperties": false,
+      "required": ["boundary", "quiesce_owned", "evidence"],
+      "properties": {
+        "boundary": { "enum": ["stopped", "read_only", "database_checkpointed", "online_safe", "manual_review"] },
+        "quiesce_owned": { "type": "boolean" },
+        "evidence": { "$ref": "#/$defs/evidenceStringArray" }
+      }
+    },
+    "logical_roots": {
+      "type": "array", "items": { "$ref": "#/$defs/logicalRoot" }
+    },
+    "inventory": {
+      "type": "array", "items": { "$ref": "#/$defs/inventoryItem" }
+    },
+    "exclusions": {
+      "type": "array", "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "native_artifacts": {
+      "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nativeArtifact" }
+    },
+    "dependency_pins": {
+      "type": "array", "items": { "$ref": "#/$defs/dependencyPin" }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "encryption": {
+      "type": "object", "additionalProperties": false,
+      "required": ["metadata_ref"],
+      "properties": {
+        "metadata_ref": { "type": "string", "minLength": 1 },
+        "key_metadata_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "accounting": {
+      "type": "object", "additionalProperties": false,
+      "required": ["discovered_items", "accounted_items", "bytes_by_class", "counts_by_disposition"],
+      "properties": {
+        "discovered_items": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "accounted_items": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "bytes_by_class": { "$ref": "#/$defs/classCountMap" },
+        "counts_by_disposition": { "$ref": "#/$defs/dispositionCountMap" }
+      }
+    },
+    "extensions": { "$ref": "#/$defs/extensions" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "qualification_status": { "const": "manual_review" } }, "required": ["qualification_status"] },
+      "then": {
+        "anyOf": [
+          { "required": ["inventory"], "properties": { "inventory": { "contains": { "type": "object", "required": ["state_class", "durability"], "properties": { "state_class": { "const": "manual_review" }, "durability": { "enum": ["required", "potentially_durable"] } } } } } },
+          { "required": ["exclusions"], "properties": { "exclusions": { "contains": { "type": "object", "required": ["state_class"], "properties": { "state_class": { "const": "manual_review" } } } } } }
+        ]
+      }
+    },
+    {
+      "if": { "anyOf": [
+        { "required": ["inventory"], "properties": { "inventory": { "contains": { "type": "object", "required": ["state_class", "durability"], "properties": { "state_class": { "const": "manual_review" }, "durability": { "enum": ["required", "potentially_durable"] } } } } } },
+        { "required": ["exclusions"], "properties": { "exclusions": { "contains": { "type": "object", "required": ["state_class"], "properties": { "state_class": { "const": "manual_review" } } } } } }
+      ] },
+      "then": { "properties": { "qualification_status": { "const": "manual_review" } } }
+    }
+  ],
+  "$defs": {
+    "stateClass": { "enum": ["portable_core", "runtime_state", "secret", "external_state", "reproducible", "machine_local", "cache", "manual_review"] },
+    "resultStatus": { "enum": ["restored", "redeemed", "re_enroll_required", "skipped", "unsupported", "manual_review"] },
+    "platform": {
+      "type": "object", "additionalProperties": false, "required": ["os", "architecture"],
+      "properties": { "os": { "type": "string", "minLength": 1 }, "architecture": { "type": "string", "minLength": 1 } }
+    },
+    "stringArray": { "type": "array", "items": { "type": "string", "pattern": "\\S" } },
+    "nonEmptyStringArray": { "type": "array", "items": { "type": "string", "pattern": "\\S" } },
+    "evidenceStringArray": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "\\S" } },
+    "logicalRoot": {
+      "type": "object", "additionalProperties": false, "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "kind": { "enum": ["runtime", "workspace", "profile", "external_provider", "logical_store"] },
+        "provider": { "type": "string", "minLength": 1 },
+        "ownership": { "type": "string", "minLength": 1 },
+        "approved_destination_class": { "const": "external_state" },
+        "containment_policy": { "const": "realpath_within_root" },
+        "restoration_requirements": { "$ref": "#/$defs/nonEmptyEvidenceStringArray" }
+      },
+      "allOf": [{
+        "if": { "properties": { "kind": { "const": "external_provider" } }, "required": ["kind"] },
+        "then": { "required": ["provider", "ownership", "approved_destination_class", "containment_policy", "restoration_requirements"] },
+        "else": { "not": { "anyOf": [{ "required": ["provider"] }, { "required": ["ownership"] }, { "required": ["approved_destination_class"] }, { "required": ["containment_policy"] }, { "required": ["restoration_requirements"] }] } }
+      }]
+    },
+    "checksum": {
+      "type": "object", "additionalProperties": false, "required": ["policy"],
+      "properties": {
+        "policy": { "enum": ["required", "metadata_only", "not_applicable"] },
+        "algorithm": { "enum": ["sha256", "hmac-sha256"] },
+        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "allOf": [{
+        "if": { "properties": { "policy": { "const": "required" } }, "required": ["policy"] },
+        "then": { "required": ["algorithm", "digest"] }
+      }]
+    },
+    "inventoryItem": {
+      "type": "object", "additionalProperties": false,
+      "required": ["item_id", "logical_root", "kind", "state_class", "durability", "semantic_role", "size_bytes", "checksum", "capture_method", "sensitivity", "restore_policy", "provenance", "reason", "disposition"],
+      "properties": {
+        "item_id": { "type": "string", "minLength": 1 },
+        "logical_root": { "type": "string", "minLength": 1 },
+        "relative_path": { "$ref": "#/$defs/portableRelativePath" },
+        "logical_store_id": { "type": "string", "pattern": "^(?!.*\\.\\.)[a-z][a-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+        "kind": { "enum": ["file", "directory", "symlink", "hardlink", "database", "logical_record", "native_archive", "unsupported"] },
+        "discovered_kind": { "type": "string", "minLength": 1 },
+        "state_class": { "$ref": "#/$defs/stateClass" },
+        "durability": { "enum": ["required", "potentially_durable", "non_durable"] },
+        "semantic_role": { "enum": ["durable", "lock", "pid", "active_lease", "pending_approval", "live_harness_state"] },
+        "size_bytes": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "checksum": { "$ref": "#/$defs/checksum" },
+        "capture_method": { "enum": ["native_command", "safe_filesystem", "database_api", "reference_only", "excluded", "manual_action"] },
+        "sensitivity": { "enum": ["ordinary", "personal", "confidential", "secret_metadata"] },
+        "restore_policy": { "enum": ["restore", "recreate", "redeem", "re_enroll", "skip", "unsupported", "manual_review"] },
+        "provenance": { "type": "object", "additionalProperties": false, "required": ["source"], "properties": { "source": { "type": "string", "minLength": 1 }, "native_artifact_id": { "type": "string", "minLength": 1 } } },
+        "reason": { "type": "string", "minLength": 1 },
+        "reason_code": { "type": "string", "minLength": 1 },
+        "disposition": { "enum": ["captured", "referenced", "excluded", "manual_review"] },
+        "result_status": { "$ref": "#/$defs/resultStatus" },
+        "policy_decision_ref": { "type": "string", "minLength": 1 },
+        "link": { "$ref": "#/$defs/linkEvidence" },
+        "capture": { "$ref": "#/$defs/captureEvidence" },
+        "external_reference": { "$ref": "#/$defs/pathReference" },
+        "hardlink": { "$ref": "#/$defs/hardlinkEvidence" },
+        "hardlink_to": { "$ref": "#/$defs/pathReference" },
+        "collision_types": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["exact", "case_only", "path_normalization"] }
+        }
+      },
+      "oneOf": [
+        { "required": ["relative_path"], "not": { "required": ["logical_store_id"] } },
+        { "required": ["logical_store_id"], "not": { "required": ["relative_path"] } }
+      ],
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "logical_record" } }, "required": ["kind"] },
+          "then": { "required": ["logical_store_id"], "not": { "required": ["relative_path"] } },
+          "else": { "required": ["relative_path"], "not": { "required": ["logical_store_id"] } }
+        },
+        {
+          "if": { "properties": { "state_class": { "const": "secret" } }, "required": ["state_class"] },
+          "then": {
+            "properties": {
+              "capture_method": { "enum": ["reference_only", "excluded", "manual_action"] },
+              "sensitivity": { "const": "secret_metadata" },
+              "restore_policy": { "enum": ["redeem", "re_enroll", "skip", "manual_review"] },
+              "disposition": { "enum": ["referenced", "excluded", "manual_review"] }
+            },
+            "oneOf": [
+              { "properties": { "capture_method": { "const": "reference_only" }, "disposition": { "const": "referenced" } }, "required": ["capture_method", "disposition"] },
+              { "properties": { "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" }, "restore_policy": { "const": "skip" } }, "required": ["capture_method", "disposition", "restore_policy"] },
+              { "properties": { "capture_method": { "const": "manual_action" }, "disposition": { "const": "manual_review" }, "restore_policy": { "const": "manual_review" } }, "required": ["capture_method", "disposition", "restore_policy"] }
+            ]
+          }
+        },
+        {
+          "if": { "properties": { "state_class": { "const": "manual_review" } }, "required": ["state_class"] },
+          "then": {
+            "required": ["durability"],
+            "oneOf": [
+              { "properties": { "capture_method": { "const": "manual_action" }, "restore_policy": { "const": "manual_review" }, "disposition": { "const": "manual_review" } }, "required": ["capture_method", "restore_policy", "disposition"] },
+              { "properties": { "capture_method": { "const": "excluded" }, "restore_policy": { "const": "skip" }, "disposition": { "const": "excluded" } }, "required": ["capture_method", "restore_policy", "disposition", "policy_decision_ref"] }
+            ]
+          }
+        },
+        {
+          "if": { "properties": { "state_class": { "enum": ["reproducible", "machine_local", "cache"] } }, "required": ["state_class"] },
+          "then": {
+            "properties": { "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" } },
+            "required": ["capture_method", "disposition"],
+            "allOf": [
+              { "if": { "properties": { "state_class": { "const": "cache" } }, "required": ["state_class"] }, "then": { "properties": { "restore_policy": { "const": "skip" } }, "required": ["restore_policy"] } },
+              { "if": { "properties": { "state_class": { "enum": ["reproducible", "machine_local"] } }, "required": ["state_class"] }, "then": { "properties": { "restore_policy": { "const": "recreate" } }, "required": ["restore_policy"] } }
+            ]
+          }
+        },
+        {
+          "if": { "properties": { "semantic_role": { "enum": ["lock", "pid", "active_lease", "pending_approval", "live_harness_state"] } }, "required": ["semantic_role"] },
+          "then": {
+            "properties": { "durability": { "const": "non_durable" }, "state_class": { "const": "machine_local" }, "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" }, "restore_policy": { "const": "recreate" } },
+            "required": ["durability", "state_class", "capture_method", "disposition", "restore_policy"]
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "symlink" } }, "required": ["kind"] },
+          "then": { "required": ["link", "capture"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "hardlink" } }, "required": ["kind"] },
+          "then": { "required": ["hardlink"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "unsupported" } }, "required": ["kind"] },
+          "then": {
+            "required": ["discovered_kind"],
+            "oneOf": [
+              { "properties": { "state_class": { "const": "manual_review" } }, "required": ["state_class"] },
+              {
+                "properties": {
+                  "semantic_role": { "enum": ["lock", "pid", "active_lease", "pending_approval", "live_harness_state"] },
+                  "durability": { "const": "non_durable" }, "state_class": { "const": "machine_local" },
+                  "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" }, "restore_policy": { "const": "recreate" }
+                },
+                "required": ["semantic_role", "durability", "state_class", "capture_method", "disposition", "restore_policy"]
+              }
+            ]
+          },
+          "else": { "not": { "required": ["discovered_kind"] } }
+        },
+        {
+          "if": { "required": ["link"] },
+          "then": { "properties": { "kind": { "const": "symlink" } }, "required": ["kind"] }
+        },
+        {
+          "if": { "required": ["capture"] },
+          "then": { "properties": { "kind": { "const": "symlink" } }, "required": ["kind"] }
+        },
+        {
+          "if": { "required": ["external_reference"] },
+          "then": { "required": ["capture", "kind", "state_class"], "properties": { "kind": { "const": "symlink" }, "state_class": { "const": "external_state" }, "capture": { "required": ["follow"], "properties": { "follow": { "const": true } } } } }
+        },
+        {
+          "if": { "required": ["capture"], "properties": { "capture": { "required": ["follow"], "properties": { "follow": { "const": true } } } } },
+          "then": { "required": ["external_reference"] }
+        },
+        {
+          "if": { "required": ["collision_types"] },
+          "then": {
+            "oneOf": [
+              { "properties": { "state_class": { "const": "manual_review" } }, "required": ["state_class"] },
+              {
+                "properties": {
+                  "semantic_role": { "enum": ["lock", "pid", "active_lease", "pending_approval", "live_harness_state"] },
+                  "durability": { "const": "non_durable" }, "state_class": { "const": "machine_local" },
+                  "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" }, "restore_policy": { "const": "recreate" }
+                },
+                "required": ["semantic_role", "durability", "state_class", "capture_method", "disposition", "restore_policy"]
+              }
+            ]
+          }
+        },
+        {
+          "if": { "required": ["hardlink"], "properties": { "hardlink": { "required": ["status"], "properties": { "status": { "const": "incomplete" } } } } },
+          "then": {
+            "oneOf": [
+              {
+                "properties": { "state_class": { "const": "manual_review" }, "capture_method": { "const": "manual_action" }, "disposition": { "const": "manual_review" } },
+                "required": ["state_class", "capture_method", "disposition"]
+              },
+              {
+                "properties": {
+                  "semantic_role": { "enum": ["lock", "pid", "active_lease", "pending_approval", "live_harness_state"] },
+                  "durability": { "const": "non_durable" }, "state_class": { "const": "machine_local" },
+                  "capture_method": { "const": "excluded" }, "disposition": { "const": "excluded" }, "restore_policy": { "const": "recreate" }
+                },
+                "required": ["semantic_role", "durability", "state_class", "capture_method", "disposition", "restore_policy"]
+              }
+            ],
+            "not": { "required": ["hardlink_to"] }
+          }
+        },
+        {
+          "if": { "required": ["hardlink_to"] },
+          "then": { "required": ["kind", "hardlink"], "properties": { "kind": { "const": "hardlink" }, "hardlink": { "required": ["status"], "properties": { "status": { "const": "complete" } } } } }
+        },
+        {
+          "if": { "required": ["hardlink"] },
+          "then": { "properties": { "kind": { "enum": ["file", "hardlink"] } }, "required": ["kind"] }
+        }
+      ]
+    },
+    "portableRelativePath": { "type": "string", "minLength": 1, "pattern": "^(?!\\s+$)(?!/)(?![A-Za-z]:)(?![\\s\\S]*//)(?![\\s\\S]*/$)(?![\\s\\S]*:)(?![\\s\\S]*%[0-9A-Za-z]{2})(?![\\s\\S]*(?:^|/)\\.{1,2}(?:/|$))(?![\\s\\S]*(?:^|/)(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])(?:\\.[^/]*)?(?:/|$))(?![\\s\\S]*[ .](?:/|$))[^\\\\\\u0000-\\u001F\\u007F]+$" },
+    "pathReference": {
+      "type": "object", "additionalProperties": false, "required": ["logical_root", "relative_path"],
+      "properties": {
+        "logical_root": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "relative_path": { "$ref": "#/$defs/portableRelativePath" }
+      }
+    },
+    "linkEvidence": {
+      "type": "object", "additionalProperties": false, "required": ["target_type", "target_recorded"],
+      "properties": {
+        "target_type": { "enum": ["absolute", "relative", "unknown", "unsafe"] },
+        "target_recorded": { "type": "boolean" },
+        "target": { "$ref": "#/$defs/portableRelativePath" }
+      },
+      "allOf": [
+        { "if": { "properties": { "target_recorded": { "const": true } }, "required": ["target_recorded"] }, "then": { "required": ["target"] } },
+        { "if": { "properties": { "target_recorded": { "const": false } }, "required": ["target_recorded"] }, "then": { "not": { "required": ["target"] } } }
+      ]
+    },
+    "captureEvidence": {
+      "type": "object", "additionalProperties": false, "required": ["follow"],
+      "properties": { "follow": { "type": "boolean" }, "external_root": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" } },
+      "allOf": [
+        { "if": { "properties": { "follow": { "const": true } }, "required": ["follow"] }, "then": { "required": ["external_root"] } },
+        { "if": { "properties": { "follow": { "const": false } }, "required": ["follow"] }, "then": { "not": { "required": ["external_root"] } } }
+      ]
+    },
+    "hardlinkEvidence": {
+      "type": "object", "additionalProperties": false, "required": ["status"],
+      "properties": {
+        "status": { "enum": ["complete", "incomplete"] }
+      }
+    },
+    "exclusion": {
+      "type": "object", "additionalProperties": false, "required": ["item_id", "state_class", "size_bytes", "reason", "policy"],
+      "properties": {
+        "item_id": { "type": "string", "minLength": 1 }, "state_class": { "$ref": "#/$defs/stateClass" }, "size_bytes": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "reason": { "type": "string", "minLength": 1 }, "policy": { "enum": ["always_exclude", "operator_decision", "unsupported"] },
+        "policy_decision_ref": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        { "if": { "properties": { "policy": { "const": "operator_decision" } }, "required": ["policy"] }, "then": { "required": ["policy_decision_ref"] } },
+        { "if": { "properties": { "state_class": { "const": "manual_review" } }, "required": ["state_class"] }, "then": { "properties": { "policy": { "const": "operator_decision" } }, "required": ["policy", "policy_decision_ref"] } }
+      ]
+    },
+    "nativeArtifact": {
+      "type": "object", "additionalProperties": false, "required": ["artifact_id", "format", "native_version", "checksum", "payload_ref"],
+      "properties": {
+        "artifact_id": { "type": "string", "minLength": 1 }, "format": { "type": "string", "minLength": 1 },
+        "native_version": { "type": "string", "minLength": 1 }, "checksum": { "$ref": "#/$defs/concreteChecksum" },
+        "payload_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "dependencyPin": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version", "source"],
+      "properties": { "name": { "type": "string", "minLength": 1 }, "version": { "type": "string", "minLength": 1 }, "source": { "type": "string", "minLength": 1 }, "integrity": { "type": "string", "minLength": 1 } }
+    },
+    "integrity": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "digest", "payload_ref"],
+      "properties": {
+        "algorithm": { "enum": ["hmac-sha256", "sha256"] }, "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "payload_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "concreteChecksum": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "digest"],
+      "properties": { "algorithm": { "enum": ["hmac-sha256", "sha256"] }, "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+    },
+    "classCountMap": {
+      "type": "object", "additionalProperties": false,
+      "required": ["portable_core", "runtime_state", "secret", "external_state", "reproducible", "machine_local", "cache", "manual_review"],
+      "properties": {
+        "portable_core": { "$ref": "#/$defs/count" }, "runtime_state": { "$ref": "#/$defs/count" }, "secret": { "$ref": "#/$defs/count" },
+        "external_state": { "$ref": "#/$defs/count" }, "reproducible": { "$ref": "#/$defs/count" }, "machine_local": { "$ref": "#/$defs/count" },
+        "cache": { "$ref": "#/$defs/count" }, "manual_review": { "$ref": "#/$defs/count" }
+      }
+    },
+    "dispositionCountMap": {
+      "type": "object", "additionalProperties": false, "required": ["captured", "referenced", "excluded", "manual_review"],
+      "properties": { "captured": { "$ref": "#/$defs/count" }, "referenced": { "$ref": "#/$defs/count" }, "excluded": { "$ref": "#/$defs/count" }, "manual_review": { "$ref": "#/$defs/count" } }
+    },
+    "count": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "nonEmptyEvidenceStringArray": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "\\S" } },
+    "extensions": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "migrated_fields": { "type": "object", "additionalProperties": true }, "vendor": { "type": "object", "additionalProperties": true } }
+    }
+  }
+}
