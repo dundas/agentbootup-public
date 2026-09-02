@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: agentbootup Brain Surface API
+  version: 1.0.0
+  description: >
+    L4 environment surface contract. Environments implement this surface; agentbootup
+    publishes the contract. Routing fields mirror mech-plane route responses and
+    orchestration request fields without prescribing provider internals.
+paths:
+  /route:
+    post:
+      operationId: routeBrainTask
+      summary: Resolve provider/model routing for a brain task.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteRequest"
+      responses:
+        "200":
+          description: Route resolved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponse"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /orchestrate:
+    post:
+      operationId: orchestrateBrainTask
+      summary: Start or resume an orchestrated brain task.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrchestrateRequest"
+      responses:
+        "200":
+          description: Orchestration accepted or resumed.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    RouteRequest:
+      type: object
+      required: [prompt]
+      additionalProperties: false
+      properties:
+        prompt:
+          type: string
+        taskType:
+          type: string
+          enum: [checkin, code, review, deploy, research, chat]
+        brainId:
+          type: string
+        budgetRemaining:
+          type: number
+        urgency:
+          type: string
+          enum: [low, med, high]
+        sessionId:
+          type: string
+    RouteResponse:
+      type: object
+      required: [provider, model, taskType, timeoutMs]
+      additionalProperties: true
+      properties:
+        provider:
+          type: string
+        model:
+          type: string
+        taskType:
+          type: string
+          enum: [checkin, code, review, deploy, research, chat]
+        timeoutMs:
+          type: integer
+          minimum: 1000
+        requireHumanGate:
+          type: boolean
+          description: Route policy signal. Deploy routes currently set this true in mech-plane.
+    OrchestrateRequest:
+      type: object
+      required: [goal, cwd, approvalMode]
+      additionalProperties: false
+      properties:
+        goal:
+          type: string
+        cwd:
+          type: string
+        approvalMode:
+          type: string
+          enum: [manual, confidence, full-auto]
+        confidenceThreshold:
+          type: number
+          minimum: 0
+          maximum: 1
+        brainId:
+          type: string
+        provider:
+          type: string
+        model:
+          type: string
+        sessionId:
+          type: string
+        mode:
+          type: string
+        maxTurns:
+          type: integer
+          minimum: 1
+          maximum: 50
+        timeoutMs:
+          type: integer
+          minimum: 1000
+          description: Per-request timeout. Environments that enforce L3 max_execution_ms must cap this value accordingly.
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      additionalProperties: true
+      properties:
+        error:
+          type: string
+          enum: [invalid_request, insufficient_budget, no_provider_available, conflict, not_found, internal_error]
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+

@@ -3,6 +3,7 @@ import { createAgent, Agent } from './agent';
 import { HeartbeatService } from './services/heartbeat';
 
 let agent: Agent | null = null;
+const nativeFetch: typeof fetch = Bun.fetch as unknown as typeof fetch;
 
 afterEach(async () => {
   if (agent?.isRunning) {
@@ -31,7 +32,7 @@ test('health endpoint returns healthy', async () => {
   agent = createAgent({ name: 'test-health', port: 19877, lock: false });
   await agent.start();
 
-  const res = await fetch('http://localhost:19877/health');
+  const res = await nativeFetch('http://localhost:19877/health');
   expect(res.status).toBe(200);
 
   const body = await res.json();
@@ -44,7 +45,7 @@ test('status endpoint returns agent status', async () => {
   agent = createAgent({ name: 'test-status', port: 19878, lock: false });
   await agent.start();
 
-  const res = await fetch('http://localhost:19878/status');
+  const res = await nativeFetch('http://localhost:19878/status');
   expect(res.status).toBe(200);
 
   const body = await res.json();
@@ -79,7 +80,7 @@ test('heartbeat service runs on start', async () => {
   // Heartbeat runs synchronously on start
   expect(heartbeatRan).toBe(true);
 
-  const res = await fetch('http://localhost:19879/status');
+  const res = await nativeFetch('http://localhost:19879/status');
   const body = await res.json();
   expect(body.services.heartbeat.running).toBe(true);
   expect(body.services.heartbeat.stats.runs).toBe(1);
@@ -92,7 +93,7 @@ test('root endpoint lists routes', async () => {
   agent = createAgent({ name: 'test-root', port: 19880, lock: false });
   await agent.start();
 
-  const res = await fetch('http://localhost:19880/');
+  const res = await nativeFetch('http://localhost:19880/');
   const body = await res.json();
   expect(body.runtime).toBe('@dundas/agent-runtime');
   expect(body.routes).toContain('/health');
@@ -104,7 +105,7 @@ test('404 for unknown routes', async () => {
   agent = createAgent({ name: 'test-404', port: 19881, lock: false });
   await agent.start();
 
-  const res = await fetch('http://localhost:19881/nonexistent');
+  const res = await nativeFetch('http://localhost:19881/nonexistent');
   expect(res.status).toBe(404);
 
   await agent.stop();

@@ -1,0 +1,71 @@
+{
+  "schema": "agentbootup.hermes-m0h-forbidden-fixture/v1",
+  "cases": [
+    {
+      "id": "synthetic_secret_sentinel",
+      "kind": "blocker_value",
+      "fragments": ["SYNTHETIC_", "SECRET_", "DO_NOT_USE_", "PROJECTOR"]
+    },
+    {
+      "id": "credential_shaped_key",
+      "kind": "blocker_value",
+      "value": { "apiKey": "synthetic-test-token" }
+    },
+    {
+      "id": "linux_runner_path",
+      "kind": "blocker_value",
+      "fragments": ["/home", "/runner", "/private/projector"]
+    },
+    {
+      "id": "macos_path",
+      "kind": "blocker_value",
+      "fragments": ["/Users", "/fixture", "/private/projector"]
+    },
+    {
+      "id": "windows_drive_path",
+      "kind": "blocker_value",
+      "fragments": ["C:\\", "Users\\fixture\\projector"]
+    },
+    {
+      "id": "windows_unc_path",
+      "kind": "blocker_value",
+      "fragments": ["\\\\server", "\\share\\projector"]
+    },
+    {
+      "id": "dotenv_name",
+      "kind": "blocker_value",
+      "value": ".env"
+    },
+    {
+      "id": "auth_filename",
+      "kind": "blocker_value",
+      "value": "auth.json"
+    },
+    {
+      "id": "unexpected_field",
+      "kind": "unexpected_field",
+      "field": "unexpectedProjectionField",
+      "value": "synthetic"
+    },
+    {
+      "id": "general_support_promotion",
+      "kind": "blocker_value",
+      "value": { "supported": true }
+    },
+    {
+      "id": "production_support_promotion",
+      "kind": "blocker_value",
+      "value": { "productionQualified": true }
+    },
+    {
+      "id": "macos_support_promotion",
+      "kind": "blocker_value",
+      "value": { "macosSupport": "supported" }
+    },
+    {
+      "id": "cross_store_support_promotion",
+      "kind": "blocker_value",
+      "value": { "crossStoreSupport": true }
+    }
+  ]
+}

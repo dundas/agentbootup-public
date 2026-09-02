@@ -1,0 +1,50 @@
+{
+  "bundle_type": "skill_bundle",
+  "bundle_name": "narrative-generator",
+  "bundle_version": "1.0.0",
+  "version_id": "narrative-generator@1.0.0+sha256_0847c3b5",
+  "bundle_hash": "sha256:0847c3b5",
+  "source": {
+    "repo": "decisive_redux"
+  },
+  "distribution": {
+    "mode": "direct_sync"
+  },
+  "files": [
+    {
+      "source": ".claude/skills/narrative-generator/SKILL.md",
+      "target": ".claude/skills/narrative-generator/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint",
+      "shared": false,
+      "shared_with": [],
+      "initializer": null
+    },
+    {
+      "source": "brain/scripts/narrative-generator.ts",
+      "target": "brain/scripts/narrative-generator.ts",
+      "kind": "runtime",
+      "required": true,
+      "role": "canonical-runtime",
+      "shared": false,
+      "shared_with": [],
+      "initializer": null
+    }
+  ],
+  "mutations": [
+    {
+      "type": "append_block_if_missing",
+      "path": ".gitignore",
+      "block": ".brain/inbox/"
+    }
+  ],
+  "install": {
+    "state_file": "skills/state/narrative-generator.json",
+    "backup_root": "skills/narrative-generator"
+  },
+  "validation": {
+    "commands": []
+  },
+  "dependencies": {}
+}

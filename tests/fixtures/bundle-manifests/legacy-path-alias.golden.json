@@ -1,0 +1,41 @@
+{
+  "bundle_type": "skill_bundle",
+  "bundle_name": "legacy-paths",
+  "bundle_version": "0.1.0",
+  "version_id": "legacy-paths@0.1.0+sha256_cafe",
+  "bundle_hash": "sha256:cafe",
+  "files": [
+    {
+      "source": ".claude/skills/legacy-paths/SKILL.md",
+      "target": ".claude/skills/legacy-paths/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": null,
+      "shared": false,
+      "shared_with": [],
+      "initializer": null
+    },
+    {
+      "source": "brain/scripts/legacy.ts",
+      "target": "brain/scripts/legacy.ts",
+      "kind": "runtime",
+      "required": true,
+      "role": null,
+      "shared": false,
+      "shared_with": [],
+      "initializer": null
+    }
+  ],
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": "skills/state/legacy-paths.json",
+    "backup_root": "skills/legacy-paths"
+  },
+  "validation": {
+    "commands": []
+  },
+  "dependencies": {},
+  "mutations": []
+}

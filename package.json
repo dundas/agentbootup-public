@@ -1,23 +1,49 @@
 {
   "name": "agentbootup",
-  "version": "0.8.0",
+  "version": "0.8.42",
   "description": "Seed Claude Code, OpenAI Codex, Gemini CLI, and Windsurf development assets (agents, skills, commands, workflows) into any project. Includes memory sync daemon and autonomous transcript analysis.",
   "type": "module",
   "bin": {
     "agentbootup": "bootup.mjs",
+    "agentbootup-append-redact-denylist": "scripts/append-redact-denylist.mjs",
+    "mech-run": "scripts/mech-run-launcher.mjs",
     "memory-sync": "memory-sync.mjs",
-    "memory-sync-daemon": "memory-sync-daemon.mjs",
     "analyze-transcripts": "analyze-transcripts.mjs"
   },
   "files": [
     "bootup.mjs",
+    "host-extension-client.mjs",
     "memory-sync.mjs",
     "memory-sync-daemon.mjs",
     "analyze-transcripts.mjs",
     "lib/**",
+    "!lib/runtime-adapters/fixture-drift.js",
+    "!lib/**/*.test.*",
+    "!lib/**/*.spec.*",
+    "!lib/runtime-adapters/circle-agent.js",
+    "!lib/runtime-adapters/circle-candidate.js",
+    "schemas/**",
+    "scripts/postinstall-libsql-natives.mjs",
+    "scripts/mech-run-launcher.mjs",
+    "scripts/mech-run-runtime-resolver.mjs",
+    "scripts/smoke-mech-run-execution-receipt.mjs",
+    "scripts/append-redact-denylist.mjs",
+    "scripts/verify-transcript-archive-production.mjs",
+    "scripts/verify-secrets-live-contract.mjs",
+    "scripts/host-extension-client-dry-run.mjs",
+    "scripts/host-extension-client-soak.mjs",
+    "scripts/repo-manager-worktrees.mjs",
+    "scripts/burn-in-daemon.ts",
+    "scripts/burn-in/**",
     "templates/**",
+    "docs/HOST_EXTENSION_CLIENT.md",
     "README.md",
     "LICENSE"
+  ],
+  "bundledDependencies": [
+    "@mech/run",
+    "@mech/storage-sdk",
+    "semver"
   ],
   "engines": {
     "node": ">=18"
@@ -37,26 +63,75 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dundas/agentbootup-public.git"
+    "url": "git+https://github.com/dundas/agentbootup.git"
   },
-  "homepage": "https://github.com/dundas/agentbootup-public#readme",
+  "homepage": "https://github.com/dundas/agentbootup#readme",
   "bugs": {
-    "url": "https://github.com/dundas/agentbootup-public/issues"
+    "url": "https://github.com/dundas/agentbootup/issues"
   },
   "author": "",
   "scripts": {
-    "dry-run": "node ./bootup.mjs --dry-run --verbose",
+    "dry-run": "node ./bootup.mjs seed --dry-run --verbose",
     "sync-templates": "node ./scripts/sync-templates.mjs",
     "check-templates": "node ./scripts/sync-templates.mjs --check",
     "public:check": "node ./scripts/public-sync.mjs check",
     "public:export": "node ./scripts/public-sync.mjs export",
     "public:promote": "node ./scripts/public-promote.mjs",
-    "test": "node -e 'console.log(\"ok\")'",
+    "test": "NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 bun test src/server/tests/ tests/auth/ tests/setup/ tests/brain/ tests/doctor/ tests/transcript-archive/ tests/*.test.* lib/daemon/redaction-denylist.test.js scripts/append-redact-denylist.test.js && NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 bun test tests/daemon/",
     "brain": "claude --project . /autonomous-bootup",
     "brain:sync": "memory-sync",
-    "brain:daemon": "memory-sync-daemon --interval 30m"
+    "brain:daemon": "memory-sync-daemon --interval 30m",
+    "server": "bun src/server/server.ts",
+    "server:dev": "bun --hot src/server/server.ts",
+    "server:seed": "bun src/server/seed.ts",
+    "server:deploy": "flyctl deploy --config fly.toml",
+    "pre-push": "bun scripts/pre-push.ts",
+    "conformance:branch": "node ./scripts/branch-conformance-gate.mjs",
+    "smoke:branch-overlay": "node ./scripts/smoke-branch-overlay-runtime.mjs",
+    "smoke:brain-mount": "node ./scripts/smoke-brain-mount.mjs",
+    "smoke:doctor-multi-install": "node ./scripts/smoke-doctor-multi-install.mjs",
+    "smoke:brain-provision": "bun scripts/smoke-brain-provision-from-zero.ts",
+    "smoke:self-serve-auth": "NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 AGENTBOOTUP_API_KEY=smoke-admin bun scripts/smoke-self-serve-auth.ts",
+    "smoke:external-auth-boundary": "NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 bun scripts/smoke-external-auth-boundary.ts",
+    "smoke:remote-local-chat": "node scripts/smoke-remote-local-chat.mjs",
+    "smoke:host-extension-client": "node scripts/host-extension-client-dry-run.mjs",
+    "soak:host-extension-client": "bun scripts/host-extension-client-soak.mjs",
+    "smoke:mech-run-execution-receipt": "bun scripts/smoke-mech-run-execution-receipt.mjs --json",
+    "smoke:transcript-containment": "bun scripts/smoke-transcript-containment.mjs",
+    "smoke:packed-bundle-containment": "node scripts/check-packed-bundle-containment.mjs",
+    "smoke:transcript-archive": "bun scripts/smoke-transcript-archive-cli.ts",
+    "verify:transcript-archive-production": "node scripts/verify-transcript-archive-production.mjs",
+    "verify:secrets-live-contract": "node scripts/verify-secrets-live-contract.mjs",
+    "check:brain-msg-drift": "bun scripts/check-brain-msg-drift.ts",
+    "check:hermes-m0h-evidence": "node scripts/runtime-adapters/check-hermes-m0h-evidence.mjs",
+    "project:hermes-m0h-evidence": "node scripts/runtime-adapters/hermes-m0h-project-evidence.mjs",
+    "pr-review-loop": "bun brain/scripts/pr-review-loop.ts",
+    "pr-loop-daemon": "bun scripts/pr-loop-daemon.ts",
+    "skill-bundle": "bun brain/scripts/skill-bundle.ts",
+    "generate-manifests": "bun scripts/generate-skill-manifests.ts",
+    "postinstall": "node scripts/postinstall-libsql-natives.mjs",
+    "soak": "NODE_ENV=test AGENTBOOTUP_ALLOW_TEST_SESSION=1 bun test tests/soak/ --timeout 180000",
+    "mutation": "bunx stryker run"
   },
   "devDependencies": {
-    "agentbootup": "^0.8.0"
+    "@stryker-mutator/core": "^9.6.1",
+    "ajv": "^8.20.0",
+    "bun-types": "latest",
+    "fast-check": "^4.9.0"
+  },
+  "overrides": {
+    "clearauth": "0.7.3"
+  },
+  "dependencies": {
+    "@agentdispatch/cli": "^0.2.1",
+    "@agentmount/contracts": "0.1.0-draft.1",
+    "@derivativelabs/agent-process": "~2.1.1",
+    "@libsql/client": "^0.17.0",
+    "@mech/plane": "4.2.0",
+    "@mech/run": "0.4.12",
+    "@mech/storage-sdk": "0.4.1",
+    "clearauth": "0.7.3",
+    "libsql": "^0.5.22",
+    "semver": "^7.7.2"
   }
 }

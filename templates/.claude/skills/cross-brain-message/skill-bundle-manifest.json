@@ -1,0 +1,45 @@
+{
+  "skill": "cross-brain-message",
+  "bundle_version": "1.0.0",
+  "version_id": "cross-brain-message@1.0.0+sha256_5f431ae1",
+  "bundle_hash": "sha256:5f431ae1da05352ab30ae542f4337861380b0d284a4ec88ae53be3cc25d098d5",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/cross-brain-message.json",
+    "backup_root": ".ai/skills/backups/cross-brain-message"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/cross-brain-message/SKILL.md",
+      "target": ".claude/skills/cross-brain-message/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/cross-brain-message/brain-msg.ts",
+      "target": ".claude/skills/cross-brain-message/brain-msg.ts",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/cross-brain-message/reference.md",
+      "target": ".claude/skills/cross-brain-message/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+import { afterEach, expect, test } from 'bun:test';
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import path from 'path';
+import { spawnSync } from 'child_process';
+import { declareDescriptor } from '../lib/brain/source-descriptor.js';
+import { descriptorPath, saveDescriptor } from '../lib/brain/source-migration.js';
+import { evaluateDaemonSource } from '../lib/brain/source-migration.js';
+import { getBrainSyncHealthPath, recordBrainSyncHealth } from '../lib/daemon/brain-asset-sync.mjs';
+import { attestRuntime } from '../scripts/burn-in/attestation';
+
+const old = { HOME: process.env.HOME, AGENTBOOTUP_HOME: process.env.AGENTBOOTUP_HOME, AGENTBOOTUP_DAEMON_DIR: process.env.AGENTBOOTUP_DAEMON_DIR, AGENTBOOTUP_CONFIG_FILE: process.env.AGENTBOOTUP_CONFIG_FILE, AGENTBOOTUP_SOURCE_DESCRIPTOR_STATE_ROOT: process.env.AGENTBOOTUP_SOURCE_DESCRIPTOR_STATE_ROOT, AGENTBOOTUP_CANONICAL_SOURCE_ENFORCE: process.env.AGENTBOOTUP_CANONICAL_SOURCE_ENFORCE };
+const roots: string[] = [];
+afterEach(() => { for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true }); for (const [k, v] of Object.entries(old)) v === undefined ? delete process.env[k] : process.env[k] = v; });
+
+test('attestation requires the real brain link and rejects a descriptor symlink alias', () => {
+  const root = realpathSync(mkdtempSync(path.join(tmpdir(), 'burn-in-attest-'))); roots.push(root);
+  const runtime = path.join(root, 'runtime'); const network = path.join(root, 'network'); const home = path.join(root, 'home');
+  mkdirSync(runtime); mkdirSync(network); mkdirSync(path.join(home, 'daemon'), { recursive: true });
+  for (const args of [['init'], ['config', 'user.email', 'test@example.com'], ['config', 'user.name', 'Test'], ['commit', '--allow-empty', '-m', 'init'], ['branch', '-M', 'main']]) expect(spawnSync('git', args, { cwd: runtime }).status).toBe(0);
+  const commit = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: runtime, encoding: 'utf8' }).stdout.trim();
+  writeFileSync(path.join(runtime, 'agentbootup.json'), JSON.stringify({ agent_id: 'bootup' }));
+  writeFileSync(path.join(network, 'agentbootup.json'), JSON.stringify({ role: 'network', projects: [{ id: 'bootup', agent_id: 'bootup', path: runtime }] }));
+  writeFileSync(path.join(root, 'config.json'), JSON.stringify({ networkRoot: network }));
+  process.env.AGENTBOOTUP_HOME = home; process.env.AGENTBOOTUP_DAEMON_DIR = path.join(home, 'custom-daemon'); process.env.AGENTBOOTUP_CONFIG_FILE = path.join(root, 'config.json'); process.env.AGENTBOOTUP_SOURCE_DESCRIPTOR_STATE_ROOT = path.join(home, 'source-descriptors'); process.env.AGENTBOOTUP_CANONICAL_SOURCE_ENFORCE = '1';
+  const canonicalRuntime = realpathSync(runtime);
+  const descriptor = declareDescriptor({ sourceKind: 'git', sourceRoot: canonicalRuntime, brainId: 'bootup', repoRef: 'refs/heads/main' }); saveDescriptor(canonicalRuntime, descriptor);
+  expect(evaluateDaemonSource(canonicalRuntime)).toMatchObject({ state: 'ready' });
+  recordBrainSyncHealth('bootup', 0, 0, runtime);
+  expect(getBrainSyncHealthPath('bootup')).toBe(path.join(home, 'custom-daemon', 'brain-sync-health-bootup.json'));
+  const expected = { brain: 'bootup', canonicalRef: 'refs/heads/main', canonicalCommit: commit };
+  expect(attestRuntime(runtime, expected)).toMatchObject({ ready: true, code: 'ready' });
+  const alias = path.join(root, 'runtime-alias'); symlinkSync(runtime, alias);
+  expect(recordBrainSyncHealth('bootup', 0, 0, alias).runtimeRootBinding).toBeNull();
+  recordBrainSyncHealth('bootup', 0, 0, runtime);
+  const parentAlias = path.join(root, 'runtime-parent-alias'); symlinkSync(root, parentAlias);
+  const ancestorAlias = path.join(parentAlias, 'runtime');
+  expect(recordBrainSyncHealth('bootup', 0, 0, ancestorAlias).runtimeRootBinding).toBeNull();
+  expect(attestRuntime(ancestorAlias, expected)).toMatchObject({ ready: false, code: 'runtime_root_unsafe' });
+  recordBrainSyncHealth('bootup', 0, 0, runtime);
+  writeFileSync(descriptorPath(canonicalRuntime), JSON.stringify({ ...descriptor, source_root: alias }));
+  expect(attestRuntime(runtime, expected)).toMatchObject({ ready: false, code: 'descriptor_root_alias' });
+});

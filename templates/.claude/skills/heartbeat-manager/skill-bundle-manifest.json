@@ -1,0 +1,31 @@
+{
+  "skill": "heartbeat-manager",
+  "bundle_version": "1.0.0",
+  "version_id": "heartbeat-manager@1.0.0+sha256_e9aee5e0",
+  "bundle_hash": "sha256:e9aee5e01323ce18af9df5f7a5ef461f4d21ed6b587a3a3b2080b6483a57c1e6",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/heartbeat-manager.json",
+    "backup_root": ".ai/skills/backups/heartbeat-manager"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/heartbeat-manager/SKILL.md",
+      "target": ".claude/skills/heartbeat-manager/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

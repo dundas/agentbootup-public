@@ -1,0 +1,31 @@
+{
+  "skill": "frontend-design-concept",
+  "bundle_version": "1.0.0",
+  "version_id": "frontend-design-concept@1.0.0+sha256_4b5c06b3",
+  "bundle_hash": "sha256:4b5c06b326e5be9b10bb1fb1ccd96d0360b101c77d429bfb02af94ba8507e4af",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/frontend-design-concept.json",
+    "backup_root": ".ai/skills/backups/frontend-design-concept"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/frontend-design-concept/SKILL.md",
+      "target": ".claude/skills/frontend-design-concept/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    }
+  ]
+}

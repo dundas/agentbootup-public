@@ -1,0 +1,54 @@
+{
+  "skill": "brain-message-inbox",
+  "bundle_version": "1.0.0",
+  "version_id": "brain-message-inbox@1.0.0+sha256_368a1fe0",
+  "bundle_hash": "sha256:368a1fe0abddfada3b183d10683b9daaad25f1a1b949947d5f60678637d6f01e",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "664e27a",
+    "generated_at": "2026-06-04T09:58:14-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/brain-message-inbox.json",
+    "backup_root": ".ai/skills/backups/brain-message-inbox"
+  },
+  "validation": {
+    "commands": [
+      "env -u ADMP_AGENT_ID -u ADMP_API_KEY -u ADMP_SECRET_KEY bun brain/scripts/brain-message-inbox.ts --read-only  # must exit 10 (credentials missing; PATH preserved so bun resolves)",
+      "bun brain/scripts/brain-message-inbox.ts --help  # must exit 0"
+    ]
+  },
+  "mutations": [
+    {
+      "type": "append_block_if_missing",
+      "path": ".gitignore",
+      "content": ".brain/inbox/\n"
+    }
+  ],
+  "files": [
+    {
+      "source": ".claude/skills/brain-message-inbox/SKILL.md",
+      "target": ".claude/skills/brain-message-inbox/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/brain-message-inbox/reference.md",
+      "target": ".claude/skills/brain-message-inbox/reference.md",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": "brain/scripts/brain-message-inbox.ts",
+      "target": "brain/scripts/brain-message-inbox.ts",
+      "kind": "repo",
+      "required": true,
+      "role": "runtime"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentbootup.dev/schemas/brain-mount-record-v1.schema.json",
+  "$comment": "$id is a logical identifier only. mount.json remains backward-compatible with pre-schema_version records via reader normalization.",
+  "title": "agentbootup Brain Mount Record v1",
+  "type": "object",
+  "required": ["schema_version", "brain_id", "mounted_at", "source", "workspace_path", "cwd", "environment"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+(\\.[0-9]+)?$"
+    },
+    "brain_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "mounted_at": { "type": "string", "format": "date-time" },
+    "source_snapshot": { "type": "string" },
+    "source": { "type": "string", "minLength": 1 },
+    "workspace_path": { "type": ["string", "null"] },
+    "cwd": { "type": "string", "minLength": 1 },
+    "managed_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "mount_kind": { "type": "string", "enum": ["copy", "watch"] },
+    "live": { "type": "boolean" },
+    "last_synced_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "environment": {
+      "type": "object",
+      "required": ["name", "config_path", "config_hash", "schema_version", "approval_flow_mode", "routing"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "config_path": { "type": "string", "minLength": 1 },
+        "config_hash": { "type": "string", "minLength": 1 },
+        "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+(\\.[0-9]+)?$" },
+        "approval_flow_mode": { "type": "string" },
+        "bypass_approvals": { "type": "boolean" },
+        "skill_layers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "secret_source_namespace": { "type": "string" },
+        "mount_base": { "type": "string" },
+        "routing": {
+          "type": "object",
+          "required": ["provider", "endpoint"],
+          "additionalProperties": true,
+          "properties": {
+            "provider": { "type": "string" },
+            "endpoint": { "type": "string", "format": "uri" },
+            "approval_mode": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

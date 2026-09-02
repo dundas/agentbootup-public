@@ -44,4 +44,4 @@ description: One-line description of what this skill does.
 
 ---
 
-*This is an auto-generated reference. For full documentation with examples, see `.claude/skills/skill-creator/SKILL.md` and `reference.md`.*
+*This is an auto-generated reference. For full documentation, see `.claude/skills/skill-creator/SKILL.md`.*

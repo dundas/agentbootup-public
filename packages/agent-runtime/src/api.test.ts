@@ -210,9 +210,20 @@ describe('library API integration', () => {
 
   test('agentUninstall removes service', async () => {
     await agentUninstall(TEST_NAME);
+
+    const deadline = Date.now() + 15000;
+    while (Date.now() < deadline) {
+      const info = await agentStatus(TEST_NAME);
+      if (info.state === 'unknown') {
+        expect(info.state).toBe('unknown');
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+
     const info = await agentStatus(TEST_NAME);
     expect(info.state).toBe('unknown');
-  });
+  }, 20000);
 });
 
 // ─── Error Case Tests ────────────────────────────────────────

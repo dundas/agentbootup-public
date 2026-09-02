@@ -1,0 +1,45 @@
+{
+  "skill": "pattern-extractor",
+  "bundle_version": "1.0.0",
+  "version_id": "pattern-extractor@1.0.0+sha256_1e7bd2c0",
+  "bundle_hash": "sha256:1e7bd2c0c5cc72d9c59fdef51ffb1d67fe4780927e620e2f0829ba9b2dbbb96f",
+  "source": {
+    "repo": "agentbootup",
+    "commit": "ea0d3c2",
+    "generated_at": "2026-05-25T21:38:09-05:00"
+  },
+  "distribution": {
+    "mode": "self_apply"
+  },
+  "install": {
+    "state_file": ".ai/skills/state/pattern-extractor.json",
+    "backup_root": ".ai/skills/backups/pattern-extractor"
+  },
+  "validation": {
+    "commands": []
+  },
+  "mutations": [],
+  "files": [
+    {
+      "source": ".claude/skills/pattern-extractor/SKILL.md",
+      "target": ".claude/skills/pattern-extractor/SKILL.md",
+      "kind": "skill",
+      "required": true,
+      "role": "entrypoint"
+    },
+    {
+      "source": ".claude/skills/pattern-extractor/lib/pattern-detector.js",
+      "target": ".claude/skills/pattern-extractor/lib/pattern-detector.js",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    },
+    {
+      "source": ".claude/skills/pattern-extractor/pattern-extractor.mjs",
+      "target": ".claude/skills/pattern-extractor/pattern-extractor.mjs",
+      "kind": "skill",
+      "required": false,
+      "role": "reference"
+    }
+  ]
+}
